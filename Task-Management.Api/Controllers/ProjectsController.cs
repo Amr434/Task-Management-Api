@@ -22,4 +22,13 @@ public class ProjectsController : BaseApiController
         
         return HandleResult(result);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteProject(int id)
+    {
+        var command = new DeleteProjectCommand(id);
+        var result = await Mediator.Send(command);
+        
+        return HandleResult(result);
+    }
 }

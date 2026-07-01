@@ -22,4 +22,13 @@ public class ListsController : BaseApiController
         
         return HandleResult(result);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteList(int id)
+    {
+        var command = new DeleteListCommand(id);
+        var result = await Mediator.Send(command);
+        
+        return HandleResult(result);
+    }
 }
