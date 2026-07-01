@@ -31,4 +31,22 @@ public class TasksController : BaseApiController
         
         return HandleResult(result);
     }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<TaskItemDto>> UpdateTask(int id, [FromBody] UpdateTaskDto updateTaskDto)
+    {
+        var command = new UpdateTaskCommand(id, updateTaskDto);
+        var result = await Mediator.Send(command);
+        
+        return HandleResult(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteTask(int id)
+    {
+        var command = new DeleteTaskCommand(id);
+        var result = await Mediator.Send(command);
+        
+        return HandleResult(result);
+    }
 }
