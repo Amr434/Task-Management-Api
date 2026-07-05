@@ -9,31 +9,30 @@ using Task_Management.Domain.Shared;
 
 namespace Task_Management.Application.Features.Projects.Queries;
 
-public class GetProjectsByWorkspaceQuery : IRequest<Result<IEnumerable<ProjectDto>>>
+public class GetProjectsBySpaceQuery : IRequest<Result<IEnumerable<ProjectDto>>>
 {
-    public int WorkspaceId { get; set; }
+    public int SpaceId { get; set; }
 
-    public GetProjectsByWorkspaceQuery(int workspaceId)
+    public GetProjectsBySpaceQuery(int spaceId)
     {
-        WorkspaceId = workspaceId;
+        SpaceId = spaceId;
     }
 }
 
-public class GetProjectsByWorkspaceQueryHandler : IRequestHandler<GetProjectsByWorkspaceQuery, Result<IEnumerable<ProjectDto>>>
+public class GetProjectsBySpaceQueryHandler : IRequestHandler<GetProjectsBySpaceQuery, Result<IEnumerable<ProjectDto>>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public GetProjectsByWorkspaceQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    public GetProjectsBySpaceQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
-    public async Task<Result<IEnumerable<ProjectDto>>> Handle(GetProjectsByWorkspaceQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<ProjectDto>>> Handle(GetProjectsBySpaceQuery request, CancellationToken cancellationToken)
     {
-        // Use the specification to filter by WorkspaceId and eager-load Lists
-        var spec = new ProjectsWithListsSpecification(request.WorkspaceId);
+        var spec = new ProjectsBySpaceSpecification(request.SpaceId);
         
         var projects = await _unitOfWork.Repository<Project>().ListAsync(spec);
         

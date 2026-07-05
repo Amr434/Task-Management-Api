@@ -11,10 +11,10 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.Property(p => p.Name).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Description).HasMaxLength(500);
 
-        // One-to-Many: Workspace -> Projects
-        builder.HasOne(p => p.Workspace)
-               .WithMany(w => w.Projects)
-               .HasForeignKey(p => p.WorkspaceId)
+        // One-to-Many: Space -> Projects
+        builder.HasOne(p => p.Space)
+               .WithMany(s => s.Projects)
+               .HasForeignKey(p => p.SpaceId)
                .OnDelete(DeleteBehavior.Cascade);
     }
 }

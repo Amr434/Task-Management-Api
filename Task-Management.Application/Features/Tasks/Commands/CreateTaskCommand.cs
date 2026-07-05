@@ -26,8 +26,8 @@ public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
             .NotEmpty().WithMessage("Title is required.")
             .MaximumLength(200).WithMessage("Title must not exceed 200 characters.");
             
-        RuleFor(v => v.TaskDto.ListId)
-            .GreaterThan(0).WithMessage("ListId must be valid.");
+        RuleFor(v => v.TaskDto.ProjectId)
+            .GreaterThan(0).WithMessage("ProjectId must be valid.");
     }
 }
 

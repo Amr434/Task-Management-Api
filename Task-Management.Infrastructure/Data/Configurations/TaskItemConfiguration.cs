@@ -12,10 +12,12 @@ public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
         builder.Property(t => t.Description).HasColumnType("nvarchar(max)");
         builder.Property(t => t.Priority).HasConversion<string>(); // Save enum as string
 
-        // One-to-Many: List -> Tasks
-        builder.HasOne(t => t.List)
-               .WithMany(l => l.Tasks)
-               .HasForeignKey(t => t.ListId)
+        builder.Property(t => t.Status).HasConversion<string>(); // Save enum as string
+
+        // One-to-Many: Project -> Tasks
+        builder.HasOne(t => t.Project)
+               .WithMany(p => p.Tasks)
+               .HasForeignKey(t => t.ProjectId)
                .OnDelete(DeleteBehavior.Cascade);
 
         // Self-Referencing: ParentTask -> SubTasks

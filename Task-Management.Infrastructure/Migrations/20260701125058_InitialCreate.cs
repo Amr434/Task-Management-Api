@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Task_Management.Infrastructure.Data.Migrations
+namespace Task_Management.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -11,6 +11,22 @@ namespace Task_Management.Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Spaces",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Color = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Icon = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Spaces", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Tags",
                 columns: table => new
@@ -42,20 +58,6 @@ namespace Task_Management.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Workspaces",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Workspaces", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Projects",
                 columns: table => new
                 {
@@ -63,39 +65,39 @@ namespace Task_Management.Infrastructure.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    WorkspaceId = table.Column<int>(type: "int", nullable: false)
+                    SpaceId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Projects", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Projects_Workspaces_WorkspaceId",
-                        column: x => x.WorkspaceId,
-                        principalTable: "Workspaces",
+                        name: "FK_Projects_Spaces_SpaceId",
+                        column: x => x.SpaceId,
+                        principalTable: "Spaces",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "WorkspaceMembers",
+                name: "SpaceMembers",
                 columns: table => new
                 {
                     MembersId = table.Column<int>(type: "int", nullable: false),
-                    WorkspacesId = table.Column<int>(type: "int", nullable: false)
+                    SpacesId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WorkspaceMembers", x => new { x.MembersId, x.WorkspacesId });
+                    table.PrimaryKey("PK_SpaceMembers", x => new { x.MembersId, x.SpacesId });
                     table.ForeignKey(
-                        name: "FK_WorkspaceMembers_Users_MembersId",
-                        column: x => x.MembersId,
-                        principalTable: "Users",
+                        name: "FK_SpaceMembers_Spaces_SpacesId",
+                        column: x => x.SpacesId,
+                        principalTable: "Spaces",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WorkspaceMembers_Workspaces_WorkspacesId",
-                        column: x => x.WorkspacesId,
-                        principalTable: "Workspaces",
+                        name: "FK_SpaceMembers_Users_MembersId",
+                        column: x => x.MembersId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -272,9 +274,14 @@ namespace Task_Management.Infrastructure.Data.Migrations
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Projects_WorkspaceId",
+                name: "IX_Projects_SpaceId",
                 table: "Projects",
-                column: "WorkspaceId");
+                column: "SpaceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SpaceMembers_SpacesId",
+                table: "SpaceMembers",
+                column: "SpacesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TaskAssignees_AssigneesId",
@@ -301,11 +308,6 @@ namespace Task_Management.Infrastructure.Data.Migrations
                 table: "Users",
                 column: "Email",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WorkspaceMembers_WorkspacesId",
-                table: "WorkspaceMembers",
-                column: "WorkspacesId");
         }
 
         /// <inheritdoc />
@@ -318,13 +320,16 @@ namespace Task_Management.Infrastructure.Data.Migrations
                 name: "Comments");
 
             migrationBuilder.DropTable(
+                name: "SpaceMembers");
+
+            migrationBuilder.DropTable(
                 name: "TaskAssignees");
 
             migrationBuilder.DropTable(
                 name: "TaskTags");
 
             migrationBuilder.DropTable(
-                name: "WorkspaceMembers");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Tags");
@@ -333,16 +338,13 @@ namespace Task_Management.Infrastructure.Data.Migrations
                 name: "TaskItems");
 
             migrationBuilder.DropTable(
-                name: "Users");
-
-            migrationBuilder.DropTable(
                 name: "Lists");
 
             migrationBuilder.DropTable(
                 name: "Projects");
 
             migrationBuilder.DropTable(
-                name: "Workspaces");
+                name: "Spaces");
         }
     }
 }
