@@ -10,6 +10,6 @@ public class User : BaseEntity
     public string ExternalId { get; set; } = string.Empty;
 
     // Navigation properties
-    public ICollection<Workspace> Workspaces { get; set; } = new List<Workspace>();
+    public ICollection<Space> Spaces { get; set; } = new List<Space>();
     public ICollection<TaskItem> AssignedTasks { get; set; } = new List<TaskItem>();
 }

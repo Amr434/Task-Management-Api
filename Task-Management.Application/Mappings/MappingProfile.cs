@@ -1,8 +1,6 @@
 using AutoMapper;
-using Task_Management.Application.Features.Lists.DTOs;
 using Task_Management.Application.Features.Projects.DTOs;
 using Task_Management.Application.Features.Tasks.DTOs;
-using Task_Management.Application.Features.Workspaces.DTOs;
 using Task_Management.Domain.Entities;
 
 namespace Task_Management.Application.Mappings;
@@ -11,17 +9,14 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        // Workspaces
-        CreateMap<Workspace, WorkspaceDto>();
-        CreateMap<CreateWorkspaceDto, Workspace>();
+        // Spaces
+        CreateMap<Space, Task_Management.Application.Features.Spaces.DTOs.SpaceDto>();
+        CreateMap<Task_Management.Application.Features.Spaces.DTOs.CreateSpaceDto, Space>();
 
         // Projects
         CreateMap<Project, ProjectDto>();
         CreateMap<CreateProjectDto, Project>();
 
-        // Lists
-        CreateMap<List, ListDto>();
-        CreateMap<CreateListDto, List>();
 
         // Tasks
         CreateMap<TaskItem, TaskItemDto>();

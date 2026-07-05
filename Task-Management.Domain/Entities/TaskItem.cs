@@ -10,8 +10,9 @@ public class TaskItem : BaseEntity
     public PriorityLevel Priority { get; set; }
     public int Order { get; set; }
 
-    public int ListId { get; set; }
-    public List? List { get; set; }
+    public int ProjectId { get; set; }
+    public Project? Project { get; set; }
+    public TaskStatusLevel Status { get; set; } = TaskStatusLevel.ToDo;
 
     // Subtasks relationship
     public int? ParentTaskId { get; set; }

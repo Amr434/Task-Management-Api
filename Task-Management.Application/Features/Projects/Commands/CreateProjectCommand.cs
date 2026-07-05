@@ -26,8 +26,8 @@ public class CreateProjectCommandValidator : AbstractValidator<CreateProjectComm
             .NotEmpty().WithMessage("Name is required.")
             .MaximumLength(100).WithMessage("Name must not exceed 100 characters.");
             
-        RuleFor(v => v.ProjectDto.WorkspaceId)
-            .GreaterThan(0).WithMessage("WorkspaceId must be valid.");
+        RuleFor(v => v.ProjectDto.SpaceId)
+            .GreaterThan(0).WithMessage("SpaceId must be valid.");
     }
 }
 

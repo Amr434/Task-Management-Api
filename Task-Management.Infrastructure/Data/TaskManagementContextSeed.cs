@@ -22,30 +22,26 @@ public class TaskManagementContextSeed
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
 
-                var workspace = new Workspace
+                var space = new Space
                 {
-                    Name = "Default Workspace",
-                    Description = "The default workspace for testing.",
+                    Name = "First Space",
+                    Description = "A seeded test space",
+                    Color = "#7b68ee",
                     Members = new List<User> { user }
                 };
-                context.Workspaces.Add(workspace);
+                context.Spaces.Add(space);
                 await context.SaveChangesAsync();
 
                 var project = new Project
                 {
                     Name = "First Project",
                     Description = "A seeded test project",
-                    WorkspaceId = workspace.Id
+                    SpaceId = space.Id
                 };
                 context.Projects.Add(project);
                 await context.SaveChangesAsync();
 
-                var listToDo = new List { Name = "To Do", Order = 1, ProjectId = project.Id };
-                var listInProgress = new List { Name = "In Progress", Order = 2, ProjectId = project.Id };
-                var listDone = new List { Name = "Done", Order = 3, ProjectId = project.Id };
-                
-                context.Lists.AddRange(listToDo, listInProgress, listDone);
-                await context.SaveChangesAsync();
+
 
                 var tag = new Tag { Name = "Bug", ColorHex = "#FF0000" };
                 context.Tags.Add(tag);
@@ -57,7 +53,8 @@ public class TaskManagementContextSeed
                     Description = "Ensure the database has default data.",
                     Priority = PriorityLevel.High,
                     Order = 1,
-                    ListId = listToDo.Id,
+                    ProjectId = project.Id,
+                    Status = TaskStatusLevel.ToDo,
                     Assignees = new List<User> { user },
                     Tags = new List<Tag> { tag }
                 };

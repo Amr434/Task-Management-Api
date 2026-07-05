@@ -10,7 +10,8 @@ public class TaskItemDto
     public DateTime? DueDate { get; set; }
     public PriorityLevel Priority { get; set; }
     public int Order { get; set; }
-    public int ListId { get; set; }
+    public int ProjectId { get; set; }
+    public TaskStatusLevel Status { get; set; }
     public int? ParentTaskId { get; set; }
 
     public ICollection<Task_Management.Application.Features.Tags.DTOs.TagDto> Tags { get; set; } = new List<Task_Management.Application.Features.Tags.DTOs.TagDto>();

@@ -8,7 +8,7 @@ using Task_Management.Infrastructure.Data;
 
 #nullable disable
 
-namespace Task_Management.Infrastructure.Data.Migrations
+namespace Task_Management.Infrastructure.Migrations
 {
     [DbContext(typeof(TaskManagementDbContext))]
     partial class TaskManagementDbContextModelSnapshot : ModelSnapshot
@@ -21,6 +21,21 @@ namespace Task_Management.Infrastructure.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("SpaceUser", b =>
+                {
+                    b.Property<int>("MembersId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SpacesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MembersId", "SpacesId");
+
+                    b.HasIndex("SpacesId");
+
+                    b.ToTable("SpaceMembers", (string)null);
+                });
 
             modelBuilder.Entity("TagTaskItem", b =>
                 {
@@ -117,32 +132,6 @@ namespace Task_Management.Infrastructure.Data.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("Task_Management.Domain.Entities.List", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("Lists");
-                });
-
             modelBuilder.Entity("Task_Management.Domain.Entities.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -160,14 +149,42 @@ namespace Task_Management.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("WorkspaceId")
+                    b.Property<int>("SpaceId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("WorkspaceId");
+                    b.HasIndex("SpaceId");
 
                     b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("Task_Management.Domain.Entities.Space", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Color")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Spaces");
                 });
 
             modelBuilder.Entity("Task_Management.Domain.Entities.Tag", b =>
@@ -207,9 +224,6 @@ namespace Task_Management.Infrastructure.Data.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ListId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
@@ -220,6 +234,13 @@ namespace Task_Management.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -227,9 +248,9 @@ namespace Task_Management.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ListId");
-
                     b.HasIndex("ParentTaskId");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("TaskItems");
                 });
@@ -269,41 +290,19 @@ namespace Task_Management.Infrastructure.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Task_Management.Domain.Entities.Workspace", b =>
+            modelBuilder.Entity("SpaceUser", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasOne("Task_Management.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("MembersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Workspaces");
-                });
-
-            modelBuilder.Entity("UserWorkspace", b =>
-                {
-                    b.Property<int>("MembersId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WorkspacesId")
-                        .HasColumnType("int");
-
-                    b.HasKey("MembersId", "WorkspacesId");
-
-                    b.HasIndex("WorkspacesId");
-
-                    b.ToTable("WorkspaceMembers", (string)null);
+                    b.HasOne("Task_Management.Domain.Entities.Space", null)
+                        .WithMany()
+                        .HasForeignKey("SpacesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TagTaskItem", b =>
@@ -366,69 +365,43 @@ namespace Task_Management.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Task_Management.Domain.Entities.List", b =>
+            modelBuilder.Entity("Task_Management.Domain.Entities.Project", b =>
                 {
+                    b.HasOne("Task_Management.Domain.Entities.Space", "Space")
+                        .WithMany("Projects")
+                        .HasForeignKey("SpaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Space");
+                });
+
+            modelBuilder.Entity("Task_Management.Domain.Entities.TaskItem", b =>
+                {
+                    b.HasOne("Task_Management.Domain.Entities.TaskItem", "ParentTask")
+                        .WithMany("SubTasks")
+                        .HasForeignKey("ParentTaskId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Task_Management.Domain.Entities.Project", "Project")
-                        .WithMany("Lists")
+                        .WithMany("Tasks")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ParentTask");
 
                     b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Task_Management.Domain.Entities.Project", b =>
                 {
-                    b.HasOne("Task_Management.Domain.Entities.Workspace", "Workspace")
-                        .WithMany("Projects")
-                        .HasForeignKey("WorkspaceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Workspace");
-                });
-
-            modelBuilder.Entity("Task_Management.Domain.Entities.TaskItem", b =>
-                {
-                    b.HasOne("Task_Management.Domain.Entities.List", "List")
-                        .WithMany("Tasks")
-                        .HasForeignKey("ListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Task_Management.Domain.Entities.TaskItem", "ParentTask")
-                        .WithMany("SubTasks")
-                        .HasForeignKey("ParentTaskId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("List");
-
-                    b.Navigation("ParentTask");
-                });
-
-            modelBuilder.Entity("UserWorkspace", b =>
-                {
-                    b.HasOne("Task_Management.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("MembersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Task_Management.Domain.Entities.Workspace", null)
-                        .WithMany()
-                        .HasForeignKey("WorkspacesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Task_Management.Domain.Entities.List", b =>
-                {
                     b.Navigation("Tasks");
                 });
 
-            modelBuilder.Entity("Task_Management.Domain.Entities.Project", b =>
+            modelBuilder.Entity("Task_Management.Domain.Entities.Space", b =>
                 {
-                    b.Navigation("Lists");
+                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("Task_Management.Domain.Entities.TaskItem", b =>
@@ -438,11 +411,6 @@ namespace Task_Management.Infrastructure.Data.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("SubTasks");
-                });
-
-            modelBuilder.Entity("Task_Management.Domain.Entities.Workspace", b =>
-                {
-                    b.Navigation("Projects");
                 });
 #pragma warning restore 612, 618
         }

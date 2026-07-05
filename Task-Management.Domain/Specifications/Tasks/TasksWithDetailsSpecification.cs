@@ -4,7 +4,7 @@ namespace Task_Management.Domain.Specifications.Tasks;
 
 public class TasksWithDetailsSpecification : BaseSpecification<TaskItem>
 {
-    public TasksWithDetailsSpecification(int listId) : base(t => t.ListId == listId)
+    public TasksWithDetailsSpecification(int projectId) : base(t => t.ProjectId == projectId)
     {
         AddInclude(t => t.Tags);
         AddInclude(t => t.Assignees);

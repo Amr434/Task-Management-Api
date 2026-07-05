@@ -8,30 +8,30 @@ using Task_Management.Domain.Shared;
 
 namespace Task_Management.Application.Features.Tasks.Queries;
 
-public class GetTasksByListQuery : IRequest<Result<IEnumerable<TaskItemDto>>>
+public class GetTasksByProjectQuery : IRequest<Result<IEnumerable<TaskItemDto>>>
 {
-    public int ListId { get; set; }
+    public int ProjectId { get; set; }
 
-    public GetTasksByListQuery(int listId)
+    public GetTasksByProjectQuery(int projectId)
     {
-        ListId = listId;
+        ProjectId = projectId;
     }
 }
 
-public class GetTasksByListQueryHandler : IRequestHandler<GetTasksByListQuery, Result<IEnumerable<TaskItemDto>>>
+public class GetTasksByProjectQueryHandler : IRequestHandler<GetTasksByProjectQuery, Result<IEnumerable<TaskItemDto>>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public GetTasksByListQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    public GetTasksByProjectQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
-    public async Task<Result<IEnumerable<TaskItemDto>>> Handle(GetTasksByListQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<TaskItemDto>>> Handle(GetTasksByProjectQuery request, CancellationToken cancellationToken)
     {
-        var spec = new TasksWithDetailsSpecification(request.ListId);
+        var spec = new TasksWithDetailsSpecification(request.ProjectId);
         var tasks = await _unitOfWork.Repository<TaskItem>().ListAsync(spec);
         
         var dtos = _mapper.Map<IEnumerable<TaskItemDto>>(tasks);

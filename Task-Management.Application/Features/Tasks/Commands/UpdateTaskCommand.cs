@@ -31,8 +31,8 @@ public class UpdateTaskCommandValidator : AbstractValidator<UpdateTaskCommand>
             .NotEmpty().WithMessage("Title is required.")
             .MaximumLength(200).WithMessage("Title must not exceed 200 characters.");
             
-        RuleFor(v => v.TaskDto.ListId)
-            .GreaterThan(0).WithMessage("ListId must be valid.");
+        RuleFor(v => v.TaskDto.ProjectId)
+            .GreaterThan(0).WithMessage("ProjectId must be valid.");
     }
 }
 
@@ -61,7 +61,8 @@ public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand, Resul
         task.DueDate = request.TaskDto.DueDate;
         task.Priority = request.TaskDto.Priority;
         task.Order = request.TaskDto.Order;
-        task.ListId = request.TaskDto.ListId;
+        task.ProjectId = request.TaskDto.ProjectId;
+        task.Status = request.TaskDto.Status;
         task.ParentTaskId = request.TaskDto.ParentTaskId;
 
         _unitOfWork.Repository<TaskItem>().Update(task);

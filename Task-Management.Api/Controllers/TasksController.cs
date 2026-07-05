@@ -7,10 +7,10 @@ namespace Task_Management.Api.Controllers;
 
 public class TasksController : BaseApiController
 {
-    [HttpGet("list/{listId}")]
-    public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetTasks(int listId)
+    [HttpGet("project/{projectId}")]
+    public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetTasks(int projectId)
     {
-        var result = await Mediator.Send(new GetTasksByListQuery(listId));
+        var result = await Mediator.Send(new GetTasksByProjectQuery(projectId));
         return HandleResult(result);
     }
 
