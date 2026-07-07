@@ -28,7 +28,16 @@ public class TasksController : BaseApiController
     {
         var command = new AssignTagToTaskCommand(taskId, tagId);
         var result = await Mediator.Send(command);
-        
+
+        return HandleResult(result);
+    }
+
+    [HttpDelete("{taskId}/tags/{tagId}")]
+    public async Task<ActionResult> RemoveTag(int taskId, int tagId)
+    {
+        var command = new RemoveTagFromTaskCommand(taskId, tagId);
+        var result = await Mediator.Send(command);
+
         return HandleResult(result);
     }
 

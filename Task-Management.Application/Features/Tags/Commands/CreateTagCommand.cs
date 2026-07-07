@@ -40,7 +40,20 @@ public class CreateTagCommandHandler : IRequestHandler<CreateTagCommand, Result<
 
     public async Task<Result<TagDto>> Handle(CreateTagCommand request, CancellationToken cancellationToken)
     {
+        var name = request.TagDto.Name.Trim();
+
+        // Tag names are unique (case-insensitive): reuse an existing tag rather than
+        // creating a duplicate, so there are never two tags with the same name.
+        var existing = (await _unitOfWork.Repository<Tag>().ListAllAsync())
+            .FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase));
+
+        if (existing != null)
+        {
+            return Result.Success(_mapper.Map<TagDto>(existing));
+        }
+
         var tag = _mapper.Map<Tag>(request.TagDto);
+        tag.Name = name;
 
         _unitOfWork.Repository<Tag>().Add(tag);
         await _unitOfWork.CompleteAsync();

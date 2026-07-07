@@ -23,12 +23,21 @@ public class SpacesController : BaseApiController
         return HandleResult(result);
     }
 
+    [HttpPut("{id}")]
+    public async Task<ActionResult<SpaceDto>> UpdateSpace(int id, [FromBody] UpdateSpaceDto updateSpaceDto)
+    {
+        var command = new UpdateSpaceCommand(id, updateSpaceDto);
+        var result = await Mediator.Send(command);
+
+        return HandleResult(result);
+    }
+
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteSpace(int id)
     {
         var command = new DeleteSpaceCommand(id);
         var result = await Mediator.Send(command);
-        
+
         return HandleResult(result);
     }
 }
