@@ -26,14 +26,19 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// Swagger is enabled in all environments so the deployed API can be verified.
+app.MapOpenApi();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Only force HTTPS locally. On Azure App Service, TLS is terminated at the
+// platform edge and traffic is forwarded over HTTP, so redirecting here can
+// cause redirect loops / 502s.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 
 app.MapControllers();
