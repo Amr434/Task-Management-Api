@@ -23,12 +23,21 @@ public class ProjectsController : BaseApiController
         return HandleResult(result);
     }
 
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ProjectDto>> UpdateProject(int id, [FromBody] UpdateProjectDto updateProjectDto)
+    {
+        var command = new UpdateProjectCommand(id, updateProjectDto);
+        var result = await Mediator.Send(command);
+
+        return HandleResult(result);
+    }
+
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteProject(int id)
     {
         var command = new DeleteProjectCommand(id);
         var result = await Mediator.Send(command);
-        
+
         return HandleResult(result);
     }
 }
