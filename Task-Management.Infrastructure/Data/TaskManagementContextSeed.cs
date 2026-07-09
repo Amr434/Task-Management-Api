@@ -61,6 +61,24 @@ public class TaskManagementContextSeed
                 context.TaskItems.Add(task);
                 await context.SaveChangesAsync();
             }
+
+            // Ensure a small roster of assignable users exists (idempotent by email),
+            // so assignees can be picked even on an already-seeded database.
+            var roster = new[]
+            {
+                new User { FirstName = "Amr", LastName = "Khaled", Email = "amr@example.com", ExternalId = "amr-external-id" },
+                new User { FirstName = "Sara", LastName = "Ali", Email = "sara@example.com", ExternalId = "sara-external-id" },
+                new User { FirstName = "Omar", LastName = "Hassan", Email = "omar@example.com", ExternalId = "omar-external-id" },
+                new User { FirstName = "Lina", LastName = "Youssef", Email = "lina@example.com", ExternalId = "lina-external-id" },
+            };
+
+            var existingEmails = context.Users.Select(u => u.Email).ToList();
+            var missing = roster.Where(u => !existingEmails.Contains(u.Email)).ToList();
+            if (missing.Count > 0)
+            {
+                context.Users.AddRange(missing);
+                await context.SaveChangesAsync();
+            }
         }
         catch (Exception ex)
         {

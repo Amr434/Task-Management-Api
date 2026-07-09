@@ -25,5 +25,8 @@ public class MappingProfile : Profile
         // Tags
         CreateMap<Tag, Task_Management.Application.Features.Tags.DTOs.TagDto>();
         CreateMap<Task_Management.Application.Features.Tags.DTOs.CreateTagDto, Tag>();
+
+        // Users
+        CreateMap<User, Task_Management.Application.Features.Users.DTOs.UserDto>();
     }
 }
