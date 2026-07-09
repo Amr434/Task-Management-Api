@@ -41,6 +41,24 @@ public class TasksController : BaseApiController
         return HandleResult(result);
     }
 
+    [HttpPost("{taskId}/assignees/{userId}")]
+    public async Task<ActionResult> AssignUser(int taskId, int userId)
+    {
+        var command = new AssignUserToTaskCommand(taskId, userId);
+        var result = await Mediator.Send(command);
+
+        return HandleResult(result);
+    }
+
+    [HttpDelete("{taskId}/assignees/{userId}")]
+    public async Task<ActionResult> RemoveUser(int taskId, int userId)
+    {
+        var command = new RemoveUserFromTaskCommand(taskId, userId);
+        var result = await Mediator.Send(command);
+
+        return HandleResult(result);
+    }
+
     [HttpPut("{id}")]
     public async Task<ActionResult<TaskItemDto>> UpdateTask(int id, [FromBody] UpdateTaskDto updateTaskDto)
     {

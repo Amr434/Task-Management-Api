@@ -15,4 +15,6 @@ public class TaskItemDto
     public int? ParentTaskId { get; set; }
 
     public ICollection<Task_Management.Application.Features.Tags.DTOs.TagDto> Tags { get; set; } = new List<Task_Management.Application.Features.Tags.DTOs.TagDto>();
+
+    public ICollection<Task_Management.Application.Features.Users.DTOs.UserDto> Assignees { get; set; } = new List<Task_Management.Application.Features.Users.DTOs.UserDto>();
 }
