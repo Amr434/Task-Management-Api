@@ -10,4 +10,8 @@ public class Project : BaseEntity
 
     // Navigation properties
     public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
+
+    // Project-level shares: users who can access just this project
+    // without being members of the parent space.
+    public ICollection<User> Members { get; set; } = new List<User>();
 }

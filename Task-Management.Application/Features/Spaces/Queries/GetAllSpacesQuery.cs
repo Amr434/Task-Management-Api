@@ -9,6 +9,12 @@ namespace Task_Management.Application.Features.Spaces.Queries;
 
 public class GetAllSpacesQuery : IRequest<Result<IEnumerable<SpaceDto>>>
 {
+    public int UserId { get; set; }
+
+    public GetAllSpacesQuery(int userId)
+    {
+        UserId = userId;
+    }
 }
 
 public class GetAllSpacesQueryHandler : IRequestHandler<GetAllSpacesQuery, Result<IEnumerable<SpaceDto>>>
@@ -24,7 +30,8 @@ public class GetAllSpacesQueryHandler : IRequestHandler<GetAllSpacesQuery, Resul
 
     public async Task<Result<IEnumerable<SpaceDto>>> Handle(GetAllSpacesQuery request, CancellationToken cancellationToken)
     {
-        var spec = new Task_Management.Domain.Specifications.Spaces.AllSpacesSpecification();
+        // Only spaces the user owns or has been accepted into.
+        var spec = new Task_Management.Domain.Specifications.Spaces.SpacesForUserSpecification(request.UserId);
         var spaces = await _unitOfWork.Repository<Space>().ListAsync(spec);
         
         var dtos = _mapper.Map<IEnumerable<SpaceDto>>(spaces);

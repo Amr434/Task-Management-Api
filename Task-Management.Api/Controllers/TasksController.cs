@@ -10,7 +10,7 @@ public class TasksController : BaseApiController
     [HttpGet("project/{projectId}")]
     public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetTasks(int projectId)
     {
-        var result = await Mediator.Send(new GetTasksByProjectQuery(projectId));
+        var result = await Mediator.Send(new GetTasksByProjectQuery(projectId, CurrentUserId));
         return HandleResult(result);
     }
 
