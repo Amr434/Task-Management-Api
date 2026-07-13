@@ -6,4 +6,5 @@ public class UserDto
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    public int Role { get; set; } // UserRole: Member=0, Admin=1
 }

@@ -1,5 +1,6 @@
 using Task_Management.Domain.Entities;
 using Task_Management.Domain.Enums;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace Task_Management.Infrastructure.Data;
@@ -77,6 +78,31 @@ public class TaskManagementContextSeed
             if (missing.Count > 0)
             {
                 context.Users.AddRange(missing);
+                await context.SaveChangesAsync();
+            }
+
+            // Offline auth bootstrap (idempotent): any user without a password
+            // gets the default temp password and must change it on first login.
+            // amr@example.com is promoted to Admin so someone can manage accounts.
+            var hasher = new PasswordHasher<User>();
+            const string defaultPassword = "ChangeMe123!";
+
+            var usersNeedingAuth = context.Users.Where(u => u.PasswordHash == "" || u.PasswordHash == null).ToList();
+            foreach (var u in usersNeedingAuth)
+            {
+                u.PasswordHash = hasher.HashPassword(u, defaultPassword);
+                u.MustChangePassword = true;
+                u.IsActive = true;
+            }
+
+            var admin = context.Users.FirstOrDefault(u => u.Email == "amr@example.com");
+            if (admin is not null && admin.Role != UserRole.Admin)
+            {
+                admin.Role = UserRole.Admin;
+            }
+
+            if (usersNeedingAuth.Count > 0 || context.ChangeTracker.HasChanges())
+            {
                 await context.SaveChangesAsync();
             }
         }

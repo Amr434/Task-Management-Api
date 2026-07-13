@@ -8,10 +8,12 @@ namespace Task_Management.Application.Features.Spaces.Commands;
 public class DeleteSpaceCommand : IRequest<Result<bool>>
 {
     public int Id { get; set; }
+    public int UserId { get; set; }
 
-    public DeleteSpaceCommand(int id)
+    public DeleteSpaceCommand(int id, int userId)
     {
         Id = id;
+        UserId = userId;
     }
 }
 
@@ -31,6 +33,11 @@ public class DeleteSpaceCommandHandler : IRequestHandler<DeleteSpaceCommand, Res
         if (space == null)
         {
             return Result.Failure<bool>(new Error("Space.NotFound", "Space not found."));
+        }
+
+        if (space.OwnerId.HasValue && space.OwnerId != request.UserId)
+        {
+            return Result.Failure<bool>(new Error("Space.NotOwner", "Only the space owner can delete this space."));
         }
 
         _unitOfWork.Repository<Space>().Delete(space);

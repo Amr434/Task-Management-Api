@@ -11,10 +11,12 @@ namespace Task_Management.Application.Features.Tasks.Queries;
 public class GetTasksByProjectQuery : IRequest<Result<IEnumerable<TaskItemDto>>>
 {
     public int ProjectId { get; set; }
+    public int UserId { get; set; }
 
-    public GetTasksByProjectQuery(int projectId)
+    public GetTasksByProjectQuery(int projectId, int userId)
     {
         ProjectId = projectId;
+        UserId = userId;
     }
 }
 
@@ -31,6 +33,14 @@ public class GetTasksByProjectQueryHandler : IRequestHandler<GetTasksByProjectQu
 
     public async Task<Result<IEnumerable<TaskItemDto>>> Handle(GetTasksByProjectQuery request, CancellationToken cancellationToken)
     {
+        // Tasks are visible only with project access (space owner/member or direct share).
+        var access = await _unitOfWork.Repository<Project>()
+            .GetEntityWithSpec(new Task_Management.Domain.Specifications.Projects.AccessibleProjectSpecification(request.ProjectId, request.UserId));
+        if (access is null)
+        {
+            return Result.Failure<IEnumerable<TaskItemDto>>(new Error("Project.NotFound", "Project not found or you don't have access to it."));
+        }
+
         var spec = new TasksWithDetailsSpecification(request.ProjectId);
         var tasks = await _unitOfWork.Repository<TaskItem>().ListAsync(spec);
         

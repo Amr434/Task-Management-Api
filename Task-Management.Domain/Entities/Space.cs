@@ -7,6 +7,11 @@ public class Space : BaseEntity
     public string? Color { get; set; }
     public string? Icon { get; set; }
 
+    // Creator/owner. Only the owner and accepted Members can see the space.
+    // Nullable for rows created before sharing existed (seed backfills them).
+    public int? OwnerId { get; set; }
+    public User? Owner { get; set; }
+
     // Navigation properties
     public ICollection<Project> Projects { get; set; } = new List<Project>();
     public ICollection<User> Members { get; set; } = new List<User>();

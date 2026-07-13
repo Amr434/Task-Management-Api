@@ -11,10 +11,12 @@ namespace Task_Management.Application.Features.Spaces.Commands;
 public class CreateSpaceCommand : IRequest<Result<SpaceDto>>
 {
     public CreateSpaceDto SpaceDto { get; set; }
+    public int OwnerId { get; set; }
 
-    public CreateSpaceCommand(CreateSpaceDto spaceDto)
+    public CreateSpaceCommand(CreateSpaceDto spaceDto, int ownerId)
     {
         SpaceDto = spaceDto;
+        OwnerId = ownerId;
     }
 }
 
@@ -42,6 +44,7 @@ public class CreateSpaceCommandHandler : IRequestHandler<CreateSpaceCommand, Res
     public async Task<Result<SpaceDto>> Handle(CreateSpaceCommand request, CancellationToken cancellationToken)
     {
         var space = _mapper.Map<Space>(request.SpaceDto);
+        space.OwnerId = request.OwnerId; // Private by default: visible to the creator until shared.
 
         _unitOfWork.Repository<Space>().Add(space);
         await _unitOfWork.CompleteAsync();
