@@ -10,7 +10,7 @@ public class TasksController : BaseApiController
     [HttpGet("project/{projectId}")]
     public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetTasks(int projectId)
     {
-        var result = await Mediator.Send(new GetTasksByProjectQuery(projectId));
+        var result = await Mediator.Send(new GetTasksByProjectQuery(projectId, CurrentUserId));
         return HandleResult(result);
     }
 
@@ -36,6 +36,24 @@ public class TasksController : BaseApiController
     public async Task<ActionResult> RemoveTag(int taskId, int tagId)
     {
         var command = new RemoveTagFromTaskCommand(taskId, tagId);
+        var result = await Mediator.Send(command);
+
+        return HandleResult(result);
+    }
+
+    [HttpPost("{taskId}/assignees/{userId}")]
+    public async Task<ActionResult> AssignUser(int taskId, int userId)
+    {
+        var command = new AssignUserToTaskCommand(taskId, userId);
+        var result = await Mediator.Send(command);
+
+        return HandleResult(result);
+    }
+
+    [HttpDelete("{taskId}/assignees/{userId}")]
+    public async Task<ActionResult> RemoveUser(int taskId, int userId)
+    {
+        var command = new RemoveUserFromTaskCommand(taskId, userId);
         var result = await Mediator.Send(command);
 
         return HandleResult(result);
