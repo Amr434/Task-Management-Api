@@ -8,6 +8,7 @@ public class SpacesForUserSpecification : BaseSpecification<Space>
     public SpacesForUserSpecification(int userId)
         : base(s => s.OwnerId == userId || s.Members.Any(m => m.Id == userId))
     {
+        AddInclude(s => s.Members);
         AddOrderBy(s => s.Id);
     }
 }
