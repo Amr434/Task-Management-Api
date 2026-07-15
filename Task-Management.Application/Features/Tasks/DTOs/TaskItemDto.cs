@@ -13,6 +13,10 @@ public class TaskItemDto
     public int ProjectId { get; set; }
     public TaskStatusLevel Status { get; set; }
     public int? ParentTaskId { get; set; }
+    
+    // Additional properties for display in global views (like My Tasks)
+    public string? ProjectName { get; set; }
+    public string? SpaceName { get; set; }
 
     public ICollection<Task_Management.Application.Features.Tags.DTOs.TagDto> Tags { get; set; } = new List<Task_Management.Application.Features.Tags.DTOs.TagDto>();
 

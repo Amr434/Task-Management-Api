@@ -19,7 +19,9 @@ public class MappingProfile : Profile
 
 
         // Tasks
-        CreateMap<TaskItem, TaskItemDto>();
+        CreateMap<TaskItem, TaskItemDto>()
+            .ForMember(d => d.ProjectName, o => o.MapFrom(s => s.Project != null ? s.Project.Name : null))
+            .ForMember(d => d.SpaceName, o => o.MapFrom(s => s.Project != null && s.Project.Space != null ? s.Project.Space.Name : null));
         CreateMap<CreateTaskDto, TaskItem>();
 
         // Tags
