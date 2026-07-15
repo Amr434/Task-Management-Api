@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Task_Management.Application.Features.Tasks.Commands;
 using Task_Management.Application.Features.Tasks.DTOs;
 using Task_Management.Application.Features.Tasks.Queries;
@@ -18,6 +18,22 @@ public class TasksController : BaseApiController
     public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetAssignedTasks()
     {
         var result = await Mediator.Send(new GetAssignedTasksQuery(CurrentUserId));
+        return HandleResult(result);
+    }
+
+    // ---- Comments ----
+
+    [HttpGet("{taskId}/comments")]
+    public async Task<ActionResult<IEnumerable<Task_Management.Application.Features.Comments.DTOs.CommentDto>>> GetTaskComments(int taskId)
+    {
+        var result = await Mediator.Send(new Task_Management.Application.Features.Comments.Queries.GetTaskCommentsQuery(taskId, CurrentUserId));
+        return HandleResult(result);
+    }
+
+    [HttpPost("{taskId}/comments")]
+    public async Task<ActionResult<Task_Management.Application.Features.Comments.DTOs.CommentDto>> CreateComment(int taskId, [FromBody] Task_Management.Application.Features.Comments.DTOs.CreateCommentDto dto)
+    {
+        var result = await Mediator.Send(new Task_Management.Application.Features.Comments.Commands.CreateCommentCommand(taskId, CurrentUserId, dto));
         return HandleResult(result);
     }
 
