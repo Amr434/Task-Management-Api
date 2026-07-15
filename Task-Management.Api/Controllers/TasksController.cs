@@ -14,6 +14,13 @@ public class TasksController : BaseApiController
         return HandleResult(result);
     }
 
+    [HttpGet("assigned")]
+    public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetAssignedTasks()
+    {
+        var result = await Mediator.Send(new GetAssignedTasksQuery(CurrentUserId));
+        return HandleResult(result);
+    }
+
     [HttpPost]
     public async Task<ActionResult<TaskItemDto>> CreateTask([FromBody] CreateTaskDto createTaskDto)
     {

@@ -12,6 +12,10 @@ public class Space : BaseEntity
     public int? OwnerId { get; set; }
     public User? Owner { get; set; }
 
+    // Hidden per-user space backing the "Personal List" (ClickUp-style):
+    // lazily created, never listed in the sidebar, never shareable.
+    public bool IsPersonal { get; set; }
+
     // Navigation properties
     public ICollection<Project> Projects { get; set; } = new List<Project>();
     public ICollection<User> Members { get; set; } = new List<User>();
