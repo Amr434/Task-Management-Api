@@ -9,6 +9,7 @@ public class SharedProjectsInSpaceSpecification : BaseSpecification<Project>
     public SharedProjectsInSpaceSpecification(int spaceId, int userId)
         : base(p => p.SpaceId == spaceId && p.Members.Any(m => m.Id == userId))
     {
+        AddInclude(p => p.Members);
         AddOrderBy(p => p.Id);
     }
 }

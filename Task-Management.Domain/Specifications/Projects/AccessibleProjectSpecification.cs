@@ -12,5 +12,6 @@ public class AccessibleProjectSpecification : BaseSpecification<Project>
             p.Space!.OwnerId == userId ||
             p.Space!.Members.Any(m => m.Id == userId)))
     {
+        AddInclude(p => p.Members);
     }
 }
