@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Task_Management.Application.Features.Projects.DTOs;
 using Task_Management.Application.Features.Tasks.DTOs;
 using Task_Management.Domain.Entities;
@@ -30,6 +30,14 @@ public class MappingProfile : Profile
 
         // Users
         CreateMap<User, Task_Management.Application.Features.Users.DTOs.UserDto>();
+
+        // Comments
+        CreateMap<Comment, Task_Management.Application.Features.Comments.DTOs.CommentDto>()
+            .ForMember(d => d.Author, o => o.MapFrom(s => s.User))
+            .ForMember(d => d.TaskTitle, o => o.MapFrom(s => s.TaskItem != null ? s.TaskItem.Title : null))
+            .ForMember(d => d.ProjectId, o => o.MapFrom(s => s.TaskItem != null ? s.TaskItem.ProjectId : 0))
+            .ForMember(d => d.ProjectName, o => o.MapFrom(s => s.TaskItem != null && s.TaskItem.Project != null ? s.TaskItem.Project.Name : null))
+            .ForMember(d => d.SpaceName, o => o.MapFrom(s => s.TaskItem != null && s.TaskItem.Project != null && s.TaskItem.Project.Space != null ? s.TaskItem.Project.Space.Name : null));
 
         // Dashboards
         CreateMap<User, Task_Management.Application.Features.Dashboards.DTOs.DashboardMemberDto>()
