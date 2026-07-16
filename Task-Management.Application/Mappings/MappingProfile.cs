@@ -31,6 +31,9 @@ public class MappingProfile : Profile
         // Users
         CreateMap<User, Task_Management.Application.Features.Users.DTOs.UserDto>();
 
+        // Attachments
+        CreateMap<Attachment, Task_Management.Application.Features.Attachments.DTOs.AttachmentDto>();
+
         // Comments
         CreateMap<Comment, Task_Management.Application.Features.Comments.DTOs.CommentDto>()
             .ForMember(d => d.Author, o => o.MapFrom(s => s.User))

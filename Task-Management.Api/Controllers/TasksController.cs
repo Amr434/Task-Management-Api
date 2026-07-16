@@ -21,6 +21,30 @@ public class TasksController : BaseApiController
         return HandleResult(result);
     }
 
+    // ---- Attachments ----
+
+    [HttpGet("{taskId}/attachments")]
+    public async Task<ActionResult<IEnumerable<Task_Management.Application.Features.Attachments.DTOs.AttachmentDto>>> GetTaskAttachments(int taskId)
+    {
+        var result = await Mediator.Send(new Task_Management.Application.Features.Attachments.Queries.GetTaskAttachmentsQuery(taskId, CurrentUserId));
+        return HandleResult(result);
+    }
+
+    [HttpPost("{taskId}/attachments")]
+    [RequestSizeLimit(26_214_400)] // 25 MB
+    public async Task<ActionResult<Task_Management.Application.Features.Attachments.DTOs.AttachmentDto>> UploadAttachment(int taskId, IFormFile file)
+    {
+        if (file is null || file.Length == 0)
+        {
+            return BadRequest(new Task_Management.Domain.Shared.Error("Attachment.Empty", "No file was provided."));
+        }
+        await using var stream = file.OpenReadStream();
+        var command = new Task_Management.Application.Features.Attachments.Commands.UploadAttachmentCommand(
+            taskId, CurrentUserId, file.FileName, file.ContentType, file.Length, stream);
+        var result = await Mediator.Send(command);
+        return HandleResult(result);
+    }
+
     // ---- Comments ----
 
     [HttpGet("{taskId}/comments")]
