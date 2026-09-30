@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using Task_Management.Infrastructure;
 using Task_Management.Application;
@@ -60,6 +61,40 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
         options.Events = new JwtBearerEvents
         {
+            // Tokens live up to 60 minutes, so re-check the user on every request:
+            // a deactivated user is rejected right away (401 -> the apps try to
+            // refresh, that fails too, and they sign the user out), and a role
+            // change by the Super Admin applies immediately instead of at next login.
+            OnTokenValidated = async context =>
+            {
+                var idValue = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!int.TryParse(idValue, out var userId))
+                {
+                    context.Fail("Invalid token.");
+                    return;
+                }
+
+                var db = context.HttpContext.RequestServices.GetRequiredService<TaskManagementDbContext>();
+                var user = await db.Users.AsNoTracking()
+                    .Where(u => u.Id == userId)
+                    .Select(u => new { u.IsActive, u.Role })
+                    .FirstOrDefaultAsync();
+
+                if (user is null || !user.IsActive)
+                {
+                    context.Fail("This account is deactivated.");
+                    return;
+                }
+
+                if (context.Principal?.Identity is ClaimsIdentity identity)
+                {
+                    foreach (var roleClaim in identity.FindAll(ClaimTypes.Role).ToList())
+                    {
+                        identity.RemoveClaim(roleClaim);
+                    }
+                    identity.AddClaim(new Claim(ClaimTypes.Role, user.Role.ToString()));
+                }
+            },
             OnMessageReceived = context =>
             {
                 var accessToken = context.Request.Query["access_token"];
@@ -80,6 +115,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IInvitationNotifier, SignalRInvitationNotifier>();
+builder.Services.AddScoped<ICommentNotifier, SignalRCommentNotifier>();
 
 builder.Services.AddCors(options =>
 {

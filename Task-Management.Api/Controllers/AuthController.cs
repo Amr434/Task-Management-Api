@@ -45,11 +45,11 @@ public class AuthController : BaseApiController
         return HandleResult(result);
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register(RegisterUserDto dto)
     {
-        var result = await Mediator.Send(new RegisterUserCommand(dto));
+        var result = await Mediator.Send(new RegisterUserCommand(dto, CurrentUserId));
         return HandleResult(result);
     }
 

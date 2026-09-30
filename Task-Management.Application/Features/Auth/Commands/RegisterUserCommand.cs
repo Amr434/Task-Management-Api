@@ -2,6 +2,7 @@ using AutoMapper;
 using MediatR;
 using Task_Management.Application.Common.Interfaces;
 using Task_Management.Application.Features.Auth.DTOs;
+using Task_Management.Application.Features.Users;
 using Task_Management.Application.Features.Users.DTOs;
 using Task_Management.Domain.Entities;
 using Task_Management.Domain.Enums;
@@ -13,13 +14,16 @@ namespace Task_Management.Application.Features.Auth.Commands;
 
 // Admin-only: with no internet/SMTP there is no self-signup or email
 // verification; an admin creates accounts and hands out temporary passwords.
+// SuperAdmin can create Admins and Members; Admin can create Members only.
 public class RegisterUserCommand : IRequest<Result<UserDto>>
 {
     public RegisterUserDto Dto { get; set; }
+    public int ActorId { get; set; }
 
-    public RegisterUserCommand(RegisterUserDto dto)
+    public RegisterUserCommand(RegisterUserDto dto, int actorId)
     {
         Dto = dto;
+        ActorId = actorId;
     }
 }
 
@@ -49,9 +53,19 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         {
             return Result.Failure<UserDto>(new Error("Auth.WeakPassword", "Password must be at least 8 characters."));
         }
-        if (!Enum.IsDefined(typeof(UserRole), dto.Role))
+        if (dto.Role != (int)UserRole.Member && dto.Role != (int)UserRole.Admin)
         {
             return Result.Failure<UserDto>(new Error("Auth.InvalidRole", "Role must be 0 (Member) or 1 (Admin)."));
+        }
+
+        var actorResult = await UserManagementRules.LoadActiveManagerAsync(_unitOfWork, request.ActorId);
+        if (actorResult.IsFailure)
+        {
+            return Result.Failure<UserDto>(actorResult.Error);
+        }
+        if (!UserManagementRules.CanManage(actorResult.Value.Role, (UserRole)dto.Role))
+        {
+            return Result.Failure<UserDto>(new Error("Users.Forbidden", "Only the Super Admin can create Admin accounts."));
         }
 
         var repo = _unitOfWork.Repository<User>();

@@ -17,6 +17,9 @@ public class User : BaseEntity
     public bool IsActive { get; set; } = true;
     // Admin-created accounts get a temporary password; force a change on first login.
     public bool MustChangePassword { get; set; }
+    // Profile picture, relative to the file storage folder (null = none).
+    // The file name is unique per upload, so it doubles as a cache-buster.
+    public string? AvatarPath { get; set; }
 
     // Navigation properties
     public ICollection<Space> Spaces { get; set; } = new List<Space>();

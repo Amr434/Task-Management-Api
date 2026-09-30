@@ -1,11 +1,14 @@
 using AutoMapper;
 using FluentValidation;
 using MediatR;
+using Task_Management.Application.Common.Interfaces;
 using Task_Management.Application.Features.Comments.DTOs;
 using Task_Management.Domain.Entities;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Comments;
+using Task_Management.Domain.Specifications.Projects;
+using Task_Management.Domain.Specifications.Spaces;
 
 namespace Task_Management.Application.Features.Comments.Commands;
 
@@ -37,11 +40,13 @@ public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand,
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly ICommentNotifier _notifier;
 
-    public CreateCommentCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    public CreateCommentCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICommentNotifier notifier)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _notifier = notifier;
     }
 
     public async Task<Result<CommentDto>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -74,6 +79,39 @@ public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand,
         // Reload with the people/task included so the DTO comes back complete.
         var saved = await _unitOfWork.Repository<Comment>()
             .GetEntityWithSpec(new CommentByIdWithDetailsSpecification(comment.Id));
-        return Result.Success(_mapper.Map<CommentDto>(saved));
+        var dto = _mapper.Map<CommentDto>(saved);
+
+        await NotifyAsync(task.ProjectId, request.UserId, comment.AssignedToId, dto);
+
+        return Result.Success(dto);
+    }
+
+    // Live notification for everyone who can see this comment in Replies:
+    // the space owner, space members, people the project is shared with, and
+    // the person the comment is assigned to. Never the author. A failure here
+    // must not undo the saved comment, so it's swallowed.
+    private async Task NotifyAsync(int projectId, int authorId, int? assignedToId, CommentDto dto)
+    {
+        try
+        {
+            var project = await _unitOfWork.Repository<Project>()
+                .GetEntityWithSpec(new ProjectWithMembersSpecification(projectId));
+            if (project is null) return;
+            var space = await _unitOfWork.Repository<Space>()
+                .GetEntityWithSpec(new SpaceWithMembersSpecification(project.SpaceId));
+
+            var recipients = new HashSet<int>();
+            if (space?.OwnerId is int ownerId) recipients.Add(ownerId);
+            foreach (var m in space?.Members ?? Enumerable.Empty<User>()) recipients.Add(m.Id);
+            foreach (var m in project.Members) recipients.Add(m.Id);
+            if (assignedToId is int assignee) recipients.Add(assignee);
+            recipients.Remove(authorId);
+
+            await _notifier.CommentAddedAsync(recipients, dto);
+        }
+        catch
+        {
+            // Best effort: the comment is saved; the Replies list still shows it.
+        }
     }
 }
