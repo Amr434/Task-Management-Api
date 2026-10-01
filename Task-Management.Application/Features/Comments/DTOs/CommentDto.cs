@@ -20,6 +20,10 @@ public class CommentDto
     public int ProjectId { get; set; }
     public string? ProjectName { get; set; }
     public string? SpaceName { get; set; }
+
+    // Replies feed only: has the current user opened this comment yet?
+    // Always true for their own comments. Null elsewhere.
+    public bool? IsRead { get; set; }
 }
 
 public class CreateCommentDto

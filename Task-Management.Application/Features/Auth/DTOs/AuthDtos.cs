@@ -29,7 +29,7 @@ public class RegisterUserDto
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public int Role { get; set; } // UserRole: Member=0, Admin=1
+    public int Role { get; set; } // 0 = Member, 1 = Admin (only the Super Admin can create Admins)
 }
 
 public class ChangePasswordDto
