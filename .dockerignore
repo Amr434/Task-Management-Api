@@ -1,0 +1,7 @@
+**/bin
+**/obj
+**/.vs
+.git
+publish
+scripts
+**/App_Data
