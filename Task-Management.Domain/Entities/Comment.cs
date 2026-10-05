@@ -19,4 +19,7 @@ public class Comment : BaseEntity
     public int? ResolvedById { get; set; }
     public User? ResolvedBy { get; set; }
     public DateTime? ResolvedAt { get; set; }
+
+    // Who has read this comment (for the Replies unread count).
+    public ICollection<CommentRead> Reads { get; set; } = new List<CommentRead>();
 }

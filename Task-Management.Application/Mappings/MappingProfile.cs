@@ -29,7 +29,8 @@ public class MappingProfile : Profile
         CreateMap<Task_Management.Application.Features.Tags.DTOs.CreateTagDto, Tag>();
 
         // Users
-        CreateMap<User, Task_Management.Application.Features.Users.DTOs.UserDto>();
+        CreateMap<User, Task_Management.Application.Features.Users.DTOs.UserDto>()
+            .ForMember(d => d.AvatarUrl, o => o.MapFrom(s => Task_Management.Application.Features.Users.AvatarUrls.For(s)));
 
         // Attachments
         CreateMap<Attachment, Task_Management.Application.Features.Attachments.DTOs.AttachmentDto>();

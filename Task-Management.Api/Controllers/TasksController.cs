@@ -21,6 +21,14 @@ public class TasksController : BaseApiController
         return HandleResult(result);
     }
 
+    // Search box: ?q=2, ?q=#2, ?q=task 2 or ?q=login. Only tasks the user can access.
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<TaskItemDto>>> Search([FromQuery] string? q)
+    {
+        var result = await Mediator.Send(new SearchTasksQuery(CurrentUserId, q ?? string.Empty));
+        return HandleResult(result);
+    }
+
     // ---- Attachments ----
 
     [HttpGet("{taskId}/attachments")]
@@ -51,6 +59,14 @@ public class TasksController : BaseApiController
     public async Task<ActionResult<IEnumerable<Task_Management.Application.Features.Comments.DTOs.CommentDto>>> GetTaskComments(int taskId)
     {
         var result = await Mediator.Send(new Task_Management.Application.Features.Comments.Queries.GetTaskCommentsQuery(taskId, CurrentUserId));
+        return HandleResult(result);
+    }
+
+    // Opening a task marks all of its comments as read for the current user.
+    [HttpPost("{taskId}/comments/read")]
+    public async Task<ActionResult<int>> MarkTaskCommentsRead(int taskId)
+    {
+        var result = await Mediator.Send(new Task_Management.Application.Features.Comments.Commands.MarkRepliesReadCommand(CurrentUserId, taskId: taskId));
         return HandleResult(result);
     }
 

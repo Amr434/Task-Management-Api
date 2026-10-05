@@ -7,6 +7,10 @@ namespace Task_Management.Infrastructure.Data;
 
 public class TaskManagementContextSeed
 {
+    // The one Super Admin account. Its default password is the same seeded
+    // ChangeMe123! as everyone else, and it must be changed on first login.
+    public const string SuperAdminEmail = "superadmin@example.com";
+
     public static async Task SeedAsync(TaskManagementDbContext context, ILoggerFactory loggerFactory)
     {
         try
@@ -72,6 +76,7 @@ public class TaskManagementContextSeed
                 new User { FirstName = "Sara", LastName = "Ali", Email = "sara@example.com", ExternalId = "sara-external-id" },
                 new User { FirstName = "Omar", LastName = "Hassan", Email = "omar@example.com", ExternalId = "omar-external-id" },
                 new User { FirstName = "Lina", LastName = "Youssef", Email = "lina@example.com", ExternalId = "lina-external-id" },
+                new User { FirstName = "Super", LastName = "Admin", Email = SuperAdminEmail, ExternalId = "superadmin-external-id" },
             };
 
             var existingEmails = context.Users.Select(u => u.Email).ToList();
@@ -97,6 +102,19 @@ public class TaskManagementContextSeed
             if (admin is not null && admin.Role != UserRole.Admin)
             {
                 admin.Role = UserRole.Admin;
+            }
+
+            // Exactly one Super Admin: the seeded account. Anyone else holding the
+            // role (e.g. from a manual DB edit) is brought back down to Admin.
+            foreach (var other in context.Users.Where(x => x.Role == UserRole.SuperAdmin && x.Email != SuperAdminEmail).ToList())
+            {
+                other.Role = UserRole.Admin;
+            }
+            var superAdmin = context.Users.FirstOrDefault(u => u.Email == SuperAdminEmail);
+            if (superAdmin is not null && (superAdmin.Role != UserRole.SuperAdmin || !superAdmin.IsActive))
+            {
+                superAdmin.Role = UserRole.SuperAdmin;
+                superAdmin.IsActive = true;
             }
 
             if (usersNeedingAuth.Count > 0 || context.ChangeTracker.HasChanges())

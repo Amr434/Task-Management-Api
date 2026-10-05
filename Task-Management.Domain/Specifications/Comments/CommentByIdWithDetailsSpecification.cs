@@ -12,5 +12,8 @@ public class CommentByIdWithDetailsSpecification : BaseSpecification<Comment>
         AddInclude(c => c.AssignedTo!);
         AddInclude(c => c.ResolvedBy!);
         AddInclude(c => c.TaskItem!);
+        // Project/space names, so the comment (and its notification) can say where it was written.
+        AddInclude($"{nameof(Comment.TaskItem)}.{nameof(TaskItem.Project)}");
+        AddInclude($"{nameof(Comment.TaskItem)}.{nameof(TaskItem.Project)}.{nameof(Project.Space)}");
     }
 }
