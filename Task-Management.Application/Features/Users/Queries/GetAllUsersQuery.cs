@@ -22,7 +22,8 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, Result<
 
     public async Task<Result<IEnumerable<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        var users = await _unitOfWork.Repository<User>().ListAllAsync();
+        // The people you can invite to a space or list: active accounts only.
+        var users = (await _unitOfWork.Repository<User>().ListAllAsync()).Where(u => u.IsActive);
         var dtos = _mapper.Map<IEnumerable<UserDto>>(users);
         return Result.Success(dtos);
     }

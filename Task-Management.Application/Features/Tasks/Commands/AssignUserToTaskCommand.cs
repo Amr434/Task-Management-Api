@@ -51,6 +51,13 @@ public class AssignUserToTaskCommandHandler : IRequestHandler<AssignUserToTaskCo
             return Result.Failure<bool>(new Error("User.NotFound", $"User with Id {request.UserId} was not found."));
         }
 
+        // A deactivated user can't be given new work (the Assign list hides
+        // them; this covers requests made any other way).
+        if (!user.IsActive)
+        {
+            return Result.Failure<bool>(new Error("User.Inactive", "This user is deactivated and can't be assigned."));
+        }
+
         // 3. Ensure the user isn't already assigned to avoid duplicates
         if (task.Assignees.Any(u => u.Id == request.UserId))
         {
