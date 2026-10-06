@@ -71,7 +71,13 @@ public class GetProjectMembersQueryHandler : IRequestHandler<GetProjectMembersQu
         roster.AddRange(project.Members);
 
         // Owner may also be a member row; space + project shares can overlap.
-        var distinct = roster.GroupBy(u => u.Id).Select(g => g.First()).ToList();
+        // Deactivated users are left out: this list is what the "Assign" menus
+        // offer, and a deactivated user can no longer sign in to do the work.
+        var distinct = roster
+            .Where(u => u.IsActive)
+            .GroupBy(u => u.Id)
+            .Select(g => g.First())
+            .ToList();
         return Result.Success(_mapper.Map<IEnumerable<UserDto>>(distinct));
     }
 }

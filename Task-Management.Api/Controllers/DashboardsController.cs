@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Task_Management.Application.Features.Dashboards.Commands;
 using Task_Management.Application.Features.Dashboards.DTOs;
@@ -5,6 +6,9 @@ using Task_Management.Application.Features.Dashboards.Queries;
 
 namespace Task_Management.Api.Controllers;
 
+// Dashboards are for Admins and the Super Admin only. A Member gets 403 on
+// every endpoint here, whatever the frontend shows.
+[Authorize(Roles = "Admin,SuperAdmin")]
 public class DashboardsController : BaseApiController
 {
     [HttpGet]

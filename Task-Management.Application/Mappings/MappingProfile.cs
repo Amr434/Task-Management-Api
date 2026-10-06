@@ -59,11 +59,13 @@ public class MappingProfile : Profile
         // Space & Project Members
         CreateMap<User, Task_Management.Application.Features.Spaces.DTOs.SpaceMemberDto>()
             .ForMember(d => d.Name, o => o.MapFrom(s => $"{s.FirstName} {s.LastName}".Trim()))
-            .ForMember(d => d.Initials, o => o.MapFrom(s => GetInitials($"{s.FirstName} {s.LastName}".Trim(), s.Email)));
+            .ForMember(d => d.Initials, o => o.MapFrom(s => GetInitials($"{s.FirstName} {s.LastName}".Trim(), s.Email)))
+            .ForMember(d => d.AvatarUrl, o => o.MapFrom(s => Task_Management.Application.Features.Users.AvatarUrls.For(s)));
 
         CreateMap<User, Task_Management.Application.Features.Projects.DTOs.ProjectMemberDto>()
             .ForMember(d => d.Name, o => o.MapFrom(s => $"{s.FirstName} {s.LastName}".Trim()))
-            .ForMember(d => d.Initials, o => o.MapFrom(s => GetInitials($"{s.FirstName} {s.LastName}".Trim(), s.Email)));
+            .ForMember(d => d.Initials, o => o.MapFrom(s => GetInitials($"{s.FirstName} {s.LastName}".Trim(), s.Email)))
+            .ForMember(d => d.AvatarUrl, o => o.MapFrom(s => Task_Management.Application.Features.Users.AvatarUrls.For(s)));
     }
 
     private static string GetInitials(string name, string? email)
