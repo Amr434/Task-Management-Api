@@ -1,5 +1,7 @@
 using MediatR;
+using Task_Management.Application.Features.Tasks;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Comments;
@@ -44,6 +46,7 @@ public class DeleteCommentCommandHandler : IRequestHandler<DeleteCommentCommand,
         }
 
         _unitOfWork.Repository<Comment>().Delete(comment);
+        TaskHistory.Record(_unitOfWork, comment.TaskItemId, request.UserId, TaskActivityType.CommentDeleted, oldValue: TaskHistory.Excerpt(comment.Text));
         await _unitOfWork.CompleteAsync();
         return Result.Success(true);
     }

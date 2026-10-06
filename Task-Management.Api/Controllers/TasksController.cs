@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Task_Management.Application.Features.Tasks.Commands;
 using Task_Management.Application.Features.Tasks.DTOs;
 using Task_Management.Application.Features.Tasks.Queries;
@@ -77,10 +77,19 @@ public class TasksController : BaseApiController
         return HandleResult(result);
     }
 
+    // ---- History ----
+
+    [HttpGet("{taskId}/activity")]
+    public async Task<ActionResult<IEnumerable<TaskActivityDto>>> GetTaskActivity(int taskId)
+    {
+        var result = await Mediator.Send(new GetTaskActivityQuery(taskId, CurrentUserId));
+        return HandleResult(result);
+    }
+
     [HttpPost]
     public async Task<ActionResult<TaskItemDto>> CreateTask([FromBody] CreateTaskDto createTaskDto)
     {
-        var command = new CreateTaskCommand(createTaskDto);
+        var command = new CreateTaskCommand(CurrentUserId, createTaskDto);
         var result = await Mediator.Send(command);
         
         return HandleResult(result);
@@ -89,7 +98,7 @@ public class TasksController : BaseApiController
     [HttpPost("{taskId}/tags/{tagId}")]
     public async Task<ActionResult> AssignTag(int taskId, int tagId)
     {
-        var command = new AssignTagToTaskCommand(taskId, tagId);
+        var command = new AssignTagToTaskCommand(taskId, tagId, CurrentUserId);
         var result = await Mediator.Send(command);
 
         return HandleResult(result);
@@ -98,7 +107,7 @@ public class TasksController : BaseApiController
     [HttpDelete("{taskId}/tags/{tagId}")]
     public async Task<ActionResult> RemoveTag(int taskId, int tagId)
     {
-        var command = new RemoveTagFromTaskCommand(taskId, tagId);
+        var command = new RemoveTagFromTaskCommand(taskId, tagId, CurrentUserId);
         var result = await Mediator.Send(command);
 
         return HandleResult(result);
@@ -107,7 +116,7 @@ public class TasksController : BaseApiController
     [HttpPost("{taskId}/assignees/{userId}")]
     public async Task<ActionResult> AssignUser(int taskId, int userId)
     {
-        var command = new AssignUserToTaskCommand(taskId, userId);
+        var command = new AssignUserToTaskCommand(taskId, userId, CurrentUserId);
         var result = await Mediator.Send(command);
 
         return HandleResult(result);
@@ -116,7 +125,7 @@ public class TasksController : BaseApiController
     [HttpDelete("{taskId}/assignees/{userId}")]
     public async Task<ActionResult> RemoveUser(int taskId, int userId)
     {
-        var command = new RemoveUserFromTaskCommand(taskId, userId);
+        var command = new RemoveUserFromTaskCommand(taskId, userId, CurrentUserId);
         var result = await Mediator.Send(command);
 
         return HandleResult(result);
@@ -125,7 +134,7 @@ public class TasksController : BaseApiController
     [HttpPut("{id}")]
     public async Task<ActionResult<TaskItemDto>> UpdateTask(int id, [FromBody] UpdateTaskDto updateTaskDto)
     {
-        var command = new UpdateTaskCommand(id, updateTaskDto);
+        var command = new UpdateTaskCommand(id, CurrentUserId, updateTaskDto);
         var result = await Mediator.Send(command);
         
         return HandleResult(result);

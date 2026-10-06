@@ -1,21 +1,29 @@
 using MediatR;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Tasks;
 
 namespace Task_Management.Application.Features.Tasks.Commands;
 
-public class RemoveUserFromTaskCommand : IRequest<Result<bool>>
+public class RemoveUserFromTaskCommand : IRequest<Result<bool>>, ITaskChangeRecipients
 {
     public int TaskId { get; set; }
     public int UserId { get; set; }
 
-    public RemoveUserFromTaskCommand(int taskId, int userId)
+    // Who made the change, for the task history (UserId is the assignee).
+    public int ActorId { get; set; }
+
+    public RemoveUserFromTaskCommand(int taskId, int userId, int actorId)
     {
         TaskId = taskId;
         UserId = userId;
+        ActorId = actorId;
     }
+
+    // The removed person hears about it, though no longer an assignee.
+    public IEnumerable<int> AlsoNotify => new[] { UserId };
 }
 
 public class RemoveUserFromTaskCommandHandler : IRequestHandler<RemoveUserFromTaskCommand, Result<bool>>
@@ -47,6 +55,7 @@ public class RemoveUserFromTaskCommandHandler : IRequestHandler<RemoveUserFromTa
         }
 
         // 3. Remove the relationship and save
+        TaskHistory.Record(task, request.ActorId, TaskActivityType.AssigneeRemoved, oldValue: TaskHistory.PersonName(assignee));
         task.Assignees.Remove(assignee);
         await _unitOfWork.CompleteAsync();
 

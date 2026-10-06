@@ -3,7 +3,9 @@ using FluentValidation;
 using MediatR;
 using Task_Management.Application.Common.Interfaces;
 using Task_Management.Application.Features.Comments.DTOs;
+using Task_Management.Application.Features.Tasks;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Comments;
@@ -74,6 +76,14 @@ public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand,
         };
 
         _unitOfWork.Repository<Comment>().Add(comment);
+
+        TaskHistory.Record(_unitOfWork, task.Id, request.UserId, TaskActivityType.CommentAdded, newValue: TaskHistory.Excerpt(comment.Text));
+        if (comment.AssignedToId is int assignedId
+            && await _unitOfWork.Repository<User>().GetByIdAsync(assignedId) is User assignee)
+        {
+            TaskHistory.Record(_unitOfWork, task.Id, request.UserId, TaskActivityType.CommentAssigned, newValue: TaskHistory.PersonName(assignee));
+        }
+
         await _unitOfWork.CompleteAsync();
 
         // Reload with the people/task included so the DTO comes back complete.

@@ -116,6 +116,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IInvitationNotifier, SignalRInvitationNotifier>();
 builder.Services.AddScoped<ICommentNotifier, SignalRCommentNotifier>();
+builder.Services.AddScoped<ITaskNotifier, SignalRTaskNotifier>();
 
 builder.Services.AddCors(options =>
 {
@@ -139,9 +140,15 @@ app.UseSwaggerUI();
 // Only force HTTPS locally. On Azure App Service, TLS is terminated at the
 // platform edge and traffic is forwarded over HTTP, so redirecting here can
 // cause redirect loops / 502s.
+//
+// Locally, only redirect requests to localhost (the browser). A phone on the
+// Wi-Fi calls http://<this PC's IP>:5013 and can't follow a redirect to the
+// dev HTTPS port, which only listens on localhost.
 if (app.Environment.IsDevelopment())
 {
-    app.UseHttpsRedirection();
+    app.UseWhen(
+        ctx => ctx.Request.Host.Host is "localhost" or "127.0.0.1" or "[::1]",
+        branch => branch.UseHttpsRedirection());
 }
 
 app.UseCors("CorsPolicy");

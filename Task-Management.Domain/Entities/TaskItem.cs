@@ -24,4 +24,5 @@ public class TaskItem : BaseEntity
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+    public ICollection<TaskActivity> Activities { get; set; } = new List<TaskActivity>();
 }

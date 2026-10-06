@@ -2,7 +2,9 @@ using AutoMapper;
 using MediatR;
 using Task_Management.Application.Features.Attachments.DTOs;
 using Task_Management.Application.Features.Comments;
+using Task_Management.Application.Features.Tasks;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Attachments;
@@ -78,6 +80,7 @@ public class UploadAttachmentCommandHandler : IRequestHandler<UploadAttachmentCo
             UploadedById = request.UserId,
         };
         _unitOfWork.Repository<Attachment>().Add(attachment);
+        TaskHistory.Record(_unitOfWork, task.Id, request.UserId, TaskActivityType.AttachmentAdded, newValue: safeName);
         await _unitOfWork.CompleteAsync();
 
         var saved = await _unitOfWork.Repository<Attachment>()

@@ -1,7 +1,9 @@
 using AutoMapper;
 using MediatR;
 using Task_Management.Application.Features.Comments.DTOs;
+using Task_Management.Application.Features.Tasks;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Comments;
@@ -9,7 +11,7 @@ using Task_Management.Domain.Specifications.Comments;
 namespace Task_Management.Application.Features.Comments.Commands;
 
 // Assign, reassign, or (with null) unassign a comment.
-public class SetCommentAssigneeCommand : IRequest<Result<CommentDto>>
+public class SetCommentAssigneeCommand : IRequest<Result<CommentDto>>, ITaskChangeRecipients
 {
     public int CommentId { get; set; }
     public int UserId { get; set; }
@@ -21,6 +23,9 @@ public class SetCommentAssigneeCommand : IRequest<Result<CommentDto>>
         UserId = userId;
         AssignedToId = assignedToId;
     }
+
+    // The new assignee hears about it even if they aren't on the task.
+    public IEnumerable<int> AlsoNotify => AssignedToId is int id ? new[] { id } : Array.Empty<int>();
 }
 
 public class SetCommentAssigneeCommandHandler : IRequestHandler<SetCommentAssigneeCommand, Result<CommentDto>>
@@ -48,6 +53,21 @@ public class SetCommentAssigneeCommandHandler : IRequestHandler<SetCommentAssign
             && !await CommentAccess.CanAccessProject(_unitOfWork, comment.TaskItem.ProjectId, assigneeId))
         {
             return Result.Failure<CommentDto>(new Error("Comment.InvalidAssignee", "The assignee must be a participant in this project."));
+        }
+
+        if (comment.AssignedToId != request.AssignedToId)
+        {
+            var oldName = comment.AssignedTo is null ? null : TaskHistory.PersonName(comment.AssignedTo);
+            if (request.AssignedToId is int newId
+                && await _unitOfWork.Repository<User>().GetByIdAsync(newId) is User newAssignee)
+            {
+                TaskHistory.Record(_unitOfWork, comment.TaskItemId, request.UserId, TaskActivityType.CommentAssigned,
+                    oldValue: oldName, newValue: TaskHistory.PersonName(newAssignee));
+            }
+            else if (request.AssignedToId is null)
+            {
+                TaskHistory.Record(_unitOfWork, comment.TaskItemId, request.UserId, TaskActivityType.CommentUnassigned, oldValue: oldName);
+            }
         }
 
         comment.AssignedToId = request.AssignedToId;

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Task_Management.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Task_Management.Infrastructure.Data;
 namespace Task_Management.Infrastructure.Migrations
 {
     [DbContext(typeof(TaskManagementDbContext))]
-    partial class TaskManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260930131320_AddTaskActivity")]
+    partial class AddTaskActivity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,33 +169,6 @@ namespace Task_Management.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("Task_Management.Domain.Entities.CommentRead", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CommentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReadAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("CommentId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("CommentReads");
                 });
 
             modelBuilder.Entity("Task_Management.Domain.Entities.Dashboard", b =>
@@ -488,10 +464,6 @@ namespace Task_Management.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AvatarPath")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -644,25 +616,6 @@ namespace Task_Management.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Task_Management.Domain.Entities.CommentRead", b =>
-                {
-                    b.HasOne("Task_Management.Domain.Entities.Comment", "Comment")
-                        .WithMany("Reads")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Task_Management.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Comment");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Task_Management.Domain.Entities.Dashboard", b =>
                 {
                     b.HasOne("Task_Management.Domain.Entities.User", "Owner")
@@ -782,11 +735,6 @@ namespace Task_Management.Infrastructure.Migrations
                     b.Navigation("ParentTask");
 
                     b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("Task_Management.Domain.Entities.Comment", b =>
-                {
-                    b.Navigation("Reads");
                 });
 
             modelBuilder.Entity("Task_Management.Domain.Entities.Project", b =>

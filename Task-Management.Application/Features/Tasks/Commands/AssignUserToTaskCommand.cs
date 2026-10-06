@@ -1,5 +1,6 @@
 using MediatR;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Tasks;
@@ -11,10 +12,14 @@ public class AssignUserToTaskCommand : IRequest<Result<bool>>
     public int TaskId { get; set; }
     public int UserId { get; set; }
 
-    public AssignUserToTaskCommand(int taskId, int userId)
+    // Who made the change, for the task history (UserId is the assignee).
+    public int ActorId { get; set; }
+
+    public AssignUserToTaskCommand(int taskId, int userId, int actorId)
     {
         TaskId = taskId;
         UserId = userId;
+        ActorId = actorId;
     }
 }
 
@@ -53,6 +58,7 @@ public class AssignUserToTaskCommandHandler : IRequestHandler<AssignUserToTaskCo
         }
 
         // 4. Assign the user and save
+        TaskHistory.Record(task, request.ActorId, TaskActivityType.AssigneeAdded, newValue: TaskHistory.PersonName(user));
         task.Assignees.Add(user);
 
         // EF Core will automatically track that a new relationship was added to the join table

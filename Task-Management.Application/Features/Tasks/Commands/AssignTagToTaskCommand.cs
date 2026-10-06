@@ -1,5 +1,6 @@
 using MediatR;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Tasks;
@@ -10,11 +11,13 @@ public class AssignTagToTaskCommand : IRequest<Result<bool>>
 {
     public int TaskId { get; set; }
     public int TagId { get; set; }
+    public int ActorId { get; set; }
 
-    public AssignTagToTaskCommand(int taskId, int tagId)
+    public AssignTagToTaskCommand(int taskId, int tagId, int actorId)
     {
         TaskId = taskId;
         TagId = tagId;
+        ActorId = actorId;
     }
 }
 
@@ -53,6 +56,7 @@ public class AssignTagToTaskCommandHandler : IRequestHandler<AssignTagToTaskComm
         }
 
         // 4. Assign the tag and save
+        TaskHistory.Record(task, request.ActorId, TaskActivityType.TagAdded, newValue: tag.Name);
         task.Tags.Add(tag);
         
         // EF Core will automatically track that a new relationship was added to the join table

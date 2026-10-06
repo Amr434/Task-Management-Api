@@ -1,7 +1,9 @@
 using AutoMapper;
 using MediatR;
 using Task_Management.Application.Features.Comments.DTOs;
+using Task_Management.Application.Features.Tasks;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Comments;
@@ -45,6 +47,7 @@ public class ResolveCommentCommandHandler : IRequestHandler<ResolveCommentComman
             return Result.Failure<CommentDto>(new Error("Comment.NotFound", "Comment not found or you don't have access to it."));
         }
 
+        var wasResolved = comment.ResolvedAt is not null;
         if (request.Resolved)
         {
             comment.ResolvedById = request.UserId;
@@ -57,6 +60,12 @@ public class ResolveCommentCommandHandler : IRequestHandler<ResolveCommentComman
         }
 
         _unitOfWork.Repository<Comment>().Update(comment);
+        if (request.Resolved != wasResolved)
+        {
+            TaskHistory.Record(_unitOfWork, comment.TaskItemId, request.UserId,
+                request.Resolved ? TaskActivityType.CommentResolved : TaskActivityType.CommentReopened,
+                newValue: TaskHistory.Excerpt(comment.Text));
+        }
         await _unitOfWork.CompleteAsync();
 
         var saved = await _unitOfWork.Repository<Comment>()

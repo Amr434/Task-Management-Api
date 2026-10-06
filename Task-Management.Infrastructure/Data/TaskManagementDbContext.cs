@@ -12,6 +12,7 @@ public class TaskManagementDbContext : DbContext
     public DbSet<Tag> Tags { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentRead> CommentReads { get; set; }
+    public DbSet<TaskActivity> TaskActivities { get; set; }
     public DbSet<Attachment> Attachments { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Invitation> Invitations { get; set; }

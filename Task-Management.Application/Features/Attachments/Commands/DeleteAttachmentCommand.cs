@@ -1,6 +1,8 @@
 using MediatR;
 using Task_Management.Application.Features.Comments;
+using Task_Management.Application.Features.Tasks;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Attachments;
@@ -43,6 +45,7 @@ public class DeleteAttachmentCommandHandler : IRequestHandler<DeleteAttachmentCo
         }
 
         _unitOfWork.Repository<Attachment>().Delete(attachment);
+        TaskHistory.Record(_unitOfWork, attachment.TaskItemId, request.UserId, TaskActivityType.AttachmentDeleted, oldValue: attachment.FileName);
         await _unitOfWork.CompleteAsync();
 
         // Remove the file after the row is gone; a leftover file is harmless,
