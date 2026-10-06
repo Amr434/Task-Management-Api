@@ -12,8 +12,8 @@ using Task_Management.Domain.Specifications.Users;
 
 namespace Task_Management.Application.Features.Auth.Commands;
 
-// Admin-only: with no internet/SMTP there is no self-signup or email
-// verification; an admin creates accounts and hands out temporary passwords.
+// Admin-only: there is no self-signup; an admin creates accounts with a
+// temporary password, which is also emailed to the new user.
 // SuperAdmin can create Admins and Members; Admin can create Members only.
 public class RegisterUserCommand : IRequest<Result<UserDto>>
 {
@@ -32,12 +32,14 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IPasswordHasherService _hasher;
+    private readonly IAccountNotifier _notifier;
 
-    public RegisterUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IPasswordHasherService hasher)
+    public RegisterUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IPasswordHasherService hasher, IAccountNotifier notifier)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _hasher = hasher;
+        _notifier = notifier;
     }
 
     public async Task<Result<UserDto>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -88,6 +90,19 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
 
         repo.Add(user);
         await _unitOfWork.CompleteAsync();
+
+        // Welcome email; failing to send it must not fail the account creation.
+        try
+        {
+            var actor = actorResult.Value;
+            var actorName = $"{actor.FirstName} {actor.LastName}".Trim();
+            await _notifier.AccountCreatedAsync(user.Email, user.FirstName,
+                string.IsNullOrEmpty(actorName) ? "An admin" : actorName, dto.Password);
+        }
+        catch
+        {
+            // The admin can still hand the details over themselves.
+        }
 
         return Result.Success(_mapper.Map<UserDto>(user));
     }

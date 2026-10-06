@@ -114,9 +114,13 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddSignalR();
-builder.Services.AddScoped<IInvitationNotifier, SignalRInvitationNotifier>();
-builder.Services.AddScoped<ICommentNotifier, SignalRCommentNotifier>();
-builder.Services.AddScoped<ITaskNotifier, SignalRTaskNotifier>();
+// Notifications go out live (SignalR) and by email (see CompositeNotifiers).
+builder.Services.AddScoped<SignalRInvitationNotifier>();
+builder.Services.AddScoped<SignalRCommentNotifier>();
+builder.Services.AddScoped<SignalRTaskNotifier>();
+builder.Services.AddScoped<IInvitationNotifier, CompositeInvitationNotifier>();
+builder.Services.AddScoped<ICommentNotifier, CompositeCommentNotifier>();
+builder.Services.AddScoped<ITaskNotifier, CompositeTaskNotifier>();
 
 builder.Services.AddCors(options =>
 {
