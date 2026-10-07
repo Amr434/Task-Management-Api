@@ -8,6 +8,7 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly TaskManagementDbContext _context;
     private Hashtable _repositories;
+    private readonly List<TaskActivity> _savedActivities = new();
 
     public UnitOfWork(TaskManagementDbContext context)
     {
@@ -17,7 +18,21 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task<int> CompleteAsync()
     {
-        return await _context.SaveChangesAsync();
+        var added = _context.ChangeTracker.Entries<TaskActivity>()
+            .Where(e => e.State == Microsoft.EntityFrameworkCore.EntityState.Added)
+            .Select(e => e.Entity)
+            .ToList();
+
+        var result = await _context.SaveChangesAsync();
+        _savedActivities.AddRange(added);
+        return result;
+    }
+
+    public IReadOnlyList<TaskActivity> TakeSavedActivities()
+    {
+        var saved = _savedActivities.ToList();
+        _savedActivities.Clear();
+        return saved;
     }
 
     public void Dispose()

@@ -10,14 +10,14 @@ public class SpacesController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SpaceDto>>> GetSpaces()
     {
-        var result = await Mediator.Send(new GetAllSpacesQuery());
+        var result = await Mediator.Send(new GetAllSpacesQuery(CurrentUserId));
         return HandleResult(result);
     }
 
     [HttpPost]
     public async Task<ActionResult<SpaceDto>> CreateSpace([FromBody] CreateSpaceDto createSpaceDto)
     {
-        var command = new CreateSpaceCommand(createSpaceDto);
+        var command = new CreateSpaceCommand(createSpaceDto, CurrentUserId);
         var result = await Mediator.Send(command);
         
         return HandleResult(result);
@@ -26,7 +26,7 @@ public class SpacesController : BaseApiController
     [HttpPut("{id}")]
     public async Task<ActionResult<SpaceDto>> UpdateSpace(int id, [FromBody] UpdateSpaceDto updateSpaceDto)
     {
-        var command = new UpdateSpaceCommand(id, updateSpaceDto);
+        var command = new UpdateSpaceCommand(id, updateSpaceDto, CurrentUserId);
         var result = await Mediator.Send(command);
 
         return HandleResult(result);
@@ -35,7 +35,7 @@ public class SpacesController : BaseApiController
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteSpace(int id)
     {
-        var command = new DeleteSpaceCommand(id);
+        var command = new DeleteSpaceCommand(id, CurrentUserId);
         var result = await Mediator.Send(command);
 
         return HandleResult(result);

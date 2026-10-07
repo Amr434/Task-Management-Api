@@ -2,6 +2,7 @@ using MediatR;
 using Task_Management.Domain.Entities;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
+using Task_Management.Domain.Specifications;
 
 namespace Task_Management.Application.Features.Projects.Commands;
 
@@ -31,6 +32,14 @@ public class DeleteProjectCommandHandler : IRequestHandler<DeleteProjectCommand,
         if (project == null)
         {
             return Result.Failure<bool>(new Error("Project.NotFound", $"Project with Id {request.ProjectId} was not found."));
+        }
+
+        var invitations = await _unitOfWork.Repository<Invitation>().ListAsync(
+            new BaseSpecification<Invitation>(i => i.ProjectId == project.Id));
+
+        foreach (var inv in invitations)
+        {
+            _unitOfWork.Repository<Invitation>().Delete(inv);
         }
 
         _unitOfWork.Repository<Project>().Delete(project);

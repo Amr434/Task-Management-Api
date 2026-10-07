@@ -1,13 +1,20 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using System.Security.Claims;
 
 namespace Task_Management.Api.Controllers;
 
+// Every endpoint requires a valid JWT unless explicitly marked [AllowAnonymous]
+// (login/refresh in AuthController).
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public abstract class BaseApiController : ControllerBase
 {
+    protected int CurrentUserId =>
+        int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : 0;
     private IMediator? _mediator;
 
     protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetRequiredService<IMediator>();

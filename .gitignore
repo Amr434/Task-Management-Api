@@ -481,3 +481,6 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 /publish-selfcontained
+
+# User-uploaded attachment files (dev fallback location)
+App_Data/

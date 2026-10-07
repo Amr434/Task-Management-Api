@@ -10,7 +10,12 @@ public static class DependencyInjection
     {
         services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            // Sends a live notification for every task-history entry a command saved.
+            cfg.AddOpenBehavior(typeof(Task_Management.Application.Features.Tasks.TaskChangeNotificationBehavior<,>));
+        });
         
         return services;
     }

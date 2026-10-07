@@ -6,5 +6,6 @@ public class ProjectsBySpaceSpecification : BaseSpecification<Project>
 {
     public ProjectsBySpaceSpecification(int spaceId) : base(p => p.SpaceId == spaceId)
     {
+        AddInclude(p => p.Members);
     }
 }

@@ -11,6 +11,12 @@ public class SpaceConfiguration : IEntityTypeConfiguration<Space>
         builder.Property(s => s.Name).IsRequired().HasMaxLength(100);
         builder.Property(s => s.Description).HasMaxLength(500);
 
+        // Owner relationship
+        builder.HasOne(s => s.Owner)
+               .WithMany()
+               .HasForeignKey(s => s.OwnerId)
+               .OnDelete(DeleteBehavior.SetNull);
+
         // Many-to-Many: Space <-> User
         builder.HasMany(s => s.Members)
                .WithMany(u => u.Spaces)

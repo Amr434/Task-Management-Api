@@ -12,10 +12,12 @@ namespace Task_Management.Application.Features.Projects.Queries;
 public class GetProjectsBySpaceQuery : IRequest<Result<IEnumerable<ProjectDto>>>
 {
     public int SpaceId { get; set; }
+    public int UserId { get; set; }
 
-    public GetProjectsBySpaceQuery(int spaceId)
+    public GetProjectsBySpaceQuery(int spaceId, int userId)
     {
         SpaceId = spaceId;
+        UserId = userId;
     }
 }
 
@@ -32,10 +34,15 @@ public class GetProjectsBySpaceQueryHandler : IRequestHandler<GetProjectsBySpace
 
     public async Task<Result<IEnumerable<ProjectDto>>> Handle(GetProjectsBySpaceQuery request, CancellationToken cancellationToken)
     {
-        var spec = new ProjectsBySpaceSpecification(request.SpaceId);
-        
-        var projects = await _unitOfWork.Repository<Project>().ListAsync(spec);
-        
+        // Space-level access (owner/member) sees every project; otherwise the
+        // user only sees projects that were shared with them directly.
+        var spaceAccess = await _unitOfWork.Repository<Space>()
+            .GetEntityWithSpec(new Task_Management.Domain.Specifications.Spaces.AccessibleSpaceSpecification(request.SpaceId, request.UserId));
+
+        var projects = spaceAccess is not null
+            ? await _unitOfWork.Repository<Project>().ListAsync(new ProjectsBySpaceSpecification(request.SpaceId))
+            : await _unitOfWork.Repository<Project>().ListAsync(new SharedProjectsInSpaceSpecification(request.SpaceId, request.UserId));
+
         var dtos = _mapper.Map<IEnumerable<ProjectDto>>(projects);
         return Result.Success(dtos);
     }
