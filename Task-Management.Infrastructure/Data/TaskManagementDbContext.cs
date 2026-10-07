@@ -15,6 +15,7 @@ public class TaskManagementDbContext : DbContext
     public DbSet<TaskActivity> TaskActivities { get; set; }
     public DbSet<Attachment> Attachments { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<Invitation> Invitations { get; set; }
     public DbSet<Dashboard> Dashboards { get; set; }
 

@@ -53,6 +53,26 @@ public class AuthController : BaseApiController
         return HandleResult(result);
     }
 
+    // "Forgot password" on the login page. Always answers OK, so it never
+    // reveals whether an email belongs to an account.
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult> ForgotPassword(ForgotPasswordDto dto)
+    {
+        await Mediator.Send(new ForgotPasswordCommand(dto.Email));
+        return Ok();
+    }
+
+    // Sets a new password using the token from the emailed link.
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<ActionResult> ResetPassword(ResetPasswordDto dto)
+    {
+        var result = await Mediator.Send(new ResetPasswordCommand(dto.Token, dto.NewPassword));
+        if (result.IsFailure) return BadRequest(result.Error);
+        return Ok();
+    }
+
     [Authorize]
     [HttpPost("change-password")]
     public async Task<ActionResult> ChangePassword(ChangePasswordDto dto)

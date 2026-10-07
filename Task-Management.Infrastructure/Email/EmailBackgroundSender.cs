@@ -33,6 +33,12 @@ public class EmailBackgroundSender : BackgroundService
         }
 
         using var client = new SmtpClient();
+        // The certificate itself is always validated (issuer, dates, host name).
+        // This only controls the extra online "has it been revoked?" lookup,
+        // which fails on networks that block the certificate authorities'
+        // servers ("An incomplete certificate revocation check occurred") and
+        // would then stop every email. See EmailSettings.CheckCertificateRevocation.
+        client.CheckCertificateRevocation = _settings.CheckCertificateRevocation;
         try
         {
             while (await _queue.Reader.WaitToReadAsync(stoppingToken))

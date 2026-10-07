@@ -14,6 +14,12 @@ public class EmailSettings
     public string SenderName { get; set; } = "Task Management";
     public string AppPassword { get; set; } = string.Empty;
 
+    // Ask the certificate authority online whether the mail server's
+    // certificate was revoked. Off by default because the lookup fails on many
+    // networks and then no email can be sent; turn it on where it is reachable
+    // (EmailSettings__CheckCertificateRevocation=true).
+    public bool CheckCertificateRevocation { get; set; }
+
     // Web app address, for the "Open" links in emails.
     public string AppBaseUrl { get; set; } = "http://localhost:3000";
 
