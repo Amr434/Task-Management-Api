@@ -17,6 +17,8 @@ public class InvitationDto
     public int InviterId { get; set; }
     public string InviterName { get; set; } = string.Empty;
     public int InviteeId { get; set; }
+    // Filled in for the inviter's "accepted / declined" notification.
+    public string? InviteeName { get; set; }
     public int Status { get; set; }        // Pending=0, Accepted=1, Declined=2
     public DateTime CreatedAtUtc { get; set; }
 }

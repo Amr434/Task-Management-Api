@@ -23,7 +23,8 @@ public class EmailAccountNotifier : IAccountNotifier
         var detail = $"Email: {email}\nTemporary password: {temporaryPassword}";
         var link = $"{_settings.AppBaseUrl.TrimEnd('/')}/login";
 
-        var html = EmailTemplates.Notification(subject, message, detail, "Sign in", link);
+        var html = EmailTemplates.Notification(subject, message, detail, "Sign in", link,
+            EmailTemplates.AccountFooter);
         _queue.Enqueue(new EmailMessage(email, subject, html));
         return Task.CompletedTask;
     }
@@ -39,7 +40,8 @@ public class EmailAccountNotifier : IAccountNotifier
         // The token is hex, so it needs no URL encoding.
         var link = $"{_settings.AppBaseUrl.TrimEnd('/')}/reset-password?token={resetToken}";
 
-        var html = EmailTemplates.Notification(subject, message, detail, "Choose a new password", link);
+        var html = EmailTemplates.Notification(subject, message, detail, "Choose a new password", link,
+            EmailTemplates.AccountFooter);
         _queue.Enqueue(new EmailMessage(email, subject, html));
         return Task.CompletedTask;
     }

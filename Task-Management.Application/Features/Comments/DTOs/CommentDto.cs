@@ -33,4 +33,8 @@ public class CreateCommentDto
     // Optional: makes it an "assigned comment" (action item) for a
     // project participant — the author themselves or anyone else.
     public int? AssignedToId { get; set; }
+
+    // People @mentioned in the text (picked from the project's members). Each
+    // gets a notification; ids that aren't project participants are ignored.
+    public List<int>? MentionedUserIds { get; set; }
 }

@@ -110,6 +110,11 @@ public class RespondToInvitationCommandHandler : IRequestHandler<RespondToInvita
             Status = (int)invitation.Status,
             CreatedAtUtc = invitation.CreatedAtUtc
         };
+        if (await _unitOfWork.Repository<User>().GetByIdAsync(invitation.InviteeId) is User invitee)
+        {
+            var inviteeName = $"{invitee.FirstName} {invitee.LastName}".Trim();
+            dto.InviteeName = string.IsNullOrEmpty(inviteeName) ? invitee.Email : inviteeName;
+        }
 
         // Tell the inviter their invite was accepted/declined (best-effort).
         try

@@ -91,7 +91,8 @@ public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand,
             .GetEntityWithSpec(new CommentByIdWithDetailsSpecification(comment.Id));
         var dto = _mapper.Map<CommentDto>(saved);
 
-        await NotifyAsync(task.ProjectId, request.UserId, comment.AssignedToId, dto);
+        var mentioned = await MentionedParticipantsAsync(task.ProjectId, request.UserId, request.CommentDto.MentionedUserIds);
+        await NotifyAsync(task.ProjectId, request.UserId, comment.AssignedToId, mentioned, dto);
 
         return Result.Success(dto);
     }
@@ -100,7 +101,23 @@ public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand,
     // the space owner, space members, people the project is shared with, and
     // the person the comment is assigned to. Never the author. A failure here
     // must not undo the saved comment, so it's swallowed.
-    private async Task NotifyAsync(int projectId, int authorId, int? assignedToId, CommentDto dto)
+    // The mentioned people who can see this comment, minus the author.
+    private async Task<List<int>> MentionedParticipantsAsync(int projectId, int authorId, List<int>? mentionedIds)
+    {
+        var result = new List<int>();
+        foreach (var id in (mentionedIds ?? new List<int>()).Distinct())
+        {
+            if (id == authorId) continue;
+            var user = await _unitOfWork.Repository<User>().GetByIdAsync(id);
+            if (user is { IsActive: true } && await CommentAccess.CanAccessProject(_unitOfWork, projectId, id))
+            {
+                result.Add(id);
+            }
+        }
+        return result;
+    }
+
+    private async Task NotifyAsync(int projectId, int authorId, int? assignedToId, IReadOnlyCollection<int> mentioned, CommentDto dto)
     {
         try
         {
@@ -115,9 +132,10 @@ public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand,
             foreach (var m in space?.Members ?? Enumerable.Empty<User>()) recipients.Add(m.Id);
             foreach (var m in project.Members) recipients.Add(m.Id);
             if (assignedToId is int assignee) recipients.Add(assignee);
+            foreach (var id in mentioned) recipients.Add(id);
             recipients.Remove(authorId);
 
-            await _notifier.CommentAddedAsync(recipients, dto);
+            await _notifier.CommentAddedAsync(recipients, dto, mentioned);
         }
         catch
         {

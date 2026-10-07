@@ -76,7 +76,9 @@ public class EmailBackgroundSender : BackgroundService
             mime.Subject = message.Subject;
             mime.Body = new BodyBuilder { HtmlBody = message.HtmlBody }.ToMessageBody();
 
-            await client.SendAsync(mime, ct);
+            // The mail server's reply, so the log shows the email left the app.
+            var response = await client.SendAsync(mime, ct);
+            _logger.LogInformation("Sent email \"{Subject}\" to {To}: {Response}", message.Subject, message.To, response);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
