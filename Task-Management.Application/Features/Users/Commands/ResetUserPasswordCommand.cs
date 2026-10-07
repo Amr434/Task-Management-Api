@@ -4,6 +4,7 @@ using Task_Management.Application.Features.Users.DTOs;
 using Task_Management.Domain.Entities;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
+using Task_Management.Application.Features.Auth;
 
 namespace Task_Management.Application.Features.Users.Commands;
 
@@ -60,6 +61,8 @@ public class ResetUserPasswordCommandHandler : IRequestHandler<ResetUserPassword
         target.MustChangePassword = true;
         _unitOfWork.Repository<User>().Update(target);
         await UserManagementRules.RevokeRefreshTokensAsync(_unitOfWork, target.Id);
+        // An emailed "forgot password" link must not override the admin's reset.
+        await PasswordResetTokens.CloseOpenAsync(_unitOfWork, target.Id);
         await _unitOfWork.CompleteAsync();
 
         return Result.Success(UserManagementRules.ToManagedDto(target, actor));

@@ -52,6 +52,8 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
         user.PasswordHash = _hasher.Hash(user, request.Dto.NewPassword);
         user.MustChangePassword = false;
         repo.Update(user);
+        // An emailed "forgot password" link from before this change stops working.
+        await PasswordResetTokens.CloseOpenAsync(_unitOfWork, user.Id);
         await _unitOfWork.CompleteAsync();
 
         return Result.Success(true);

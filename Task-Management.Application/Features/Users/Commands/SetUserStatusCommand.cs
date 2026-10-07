@@ -3,6 +3,7 @@ using Task_Management.Application.Features.Users.DTOs;
 using Task_Management.Domain.Entities;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
+using Task_Management.Application.Features.Auth;
 
 namespace Task_Management.Application.Features.Users.Commands;
 
@@ -52,6 +53,8 @@ public class SetUserStatusCommandHandler : IRequestHandler<SetUserStatusCommand,
         if (!request.IsActive)
         {
             await UserManagementRules.RevokeRefreshTokensAsync(_unitOfWork, target.Id);
+            // ...and any emailed "forgot password" link stops working for good.
+            await PasswordResetTokens.CloseOpenAsync(_unitOfWork, target.Id);
         }
         await _unitOfWork.CompleteAsync();
 

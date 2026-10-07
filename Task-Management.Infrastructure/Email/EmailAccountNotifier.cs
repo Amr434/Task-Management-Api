@@ -27,4 +27,20 @@ public class EmailAccountNotifier : IAccountNotifier
         _queue.Enqueue(new EmailMessage(email, subject, html));
         return Task.CompletedTask;
     }
+
+    public Task PasswordResetRequestedAsync(string email, string firstName, string resetToken, int validForMinutes)
+    {
+        var greeting = string.IsNullOrWhiteSpace(firstName) ? "Hi," : $"Hi {firstName},";
+        var subject = "Reset your Task Management password";
+        var message = $"{greeting} we received a request to reset your password. "
+            + "Use the button below to choose a new one.";
+        var detail = $"This link works once and expires in {validForMinutes} minutes.\n"
+            + "If you didn't ask for this, you can ignore this email. Your password stays the same.";
+        // The token is hex, so it needs no URL encoding.
+        var link = $"{_settings.AppBaseUrl.TrimEnd('/')}/reset-password?token={resetToken}";
+
+        var html = EmailTemplates.Notification(subject, message, detail, "Choose a new password", link);
+        _queue.Enqueue(new EmailMessage(email, subject, html));
+        return Task.CompletedTask;
+    }
 }
