@@ -49,6 +49,14 @@ public class ProjectsController : BaseApiController
         return HandleResult(result);
     }
 
+    // Replace the project's custom board statuses (built-in ones are implicit).
+    [HttpPut("{id}/statuses")]
+    public async Task<ActionResult<ProjectDto>> UpdateProjectStatuses(int id, [FromBody] List<ProjectStatusDto> statuses)
+    {
+        var result = await Mediator.Send(new UpdateProjectStatusesCommand(id, CurrentUserId, statuses));
+        return HandleResult(result);
+    }
+
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteProject(int id)
     {

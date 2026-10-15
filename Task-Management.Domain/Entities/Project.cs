@@ -6,6 +6,10 @@ public class Project : BaseEntity
     public string? Description { get; set; }
 
     public int SpaceId { get; set; }
+
+    // Extra board columns beyond the built-in ToDo/InProgress/Complete, as a
+    // JSON array of { id, name, color }. Tasks in one carry Status = id (>= 3).
+    public string? CustomStatuses { get; set; }
     public Space? Space { get; set; }
 
     // Navigation properties

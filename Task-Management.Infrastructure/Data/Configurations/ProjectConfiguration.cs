@@ -10,6 +10,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
     {
         builder.Property(p => p.Name).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Description).HasMaxLength(500);
+        builder.Property(p => p.CustomStatuses).HasColumnType("nvarchar(max)");
 
         // One-to-Many: Space -> Projects
         builder.HasOne(p => p.Space)

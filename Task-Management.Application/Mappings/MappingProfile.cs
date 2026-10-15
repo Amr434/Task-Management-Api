@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Task_Management.Application.Features.Projects;
 using Task_Management.Application.Features.Projects.DTOs;
 using Task_Management.Application.Features.Tasks.DTOs;
 using Task_Management.Domain.Entities;
@@ -14,7 +15,8 @@ public class MappingProfile : Profile
         CreateMap<Task_Management.Application.Features.Spaces.DTOs.CreateSpaceDto, Space>();
 
         // Projects
-        CreateMap<Project, ProjectDto>();
+        CreateMap<Project, ProjectDto>()
+            .ForMember(d => d.Statuses, o => o.MapFrom(s => ProjectStatuses.Parse(s.CustomStatuses)));
         CreateMap<CreateProjectDto, Project>();
 
 

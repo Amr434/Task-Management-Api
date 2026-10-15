@@ -9,6 +9,16 @@ public class ProjectDto
     
     // We could return Lists inside the project, but we'll leave it out for simplicity unless needed
     public ICollection<ProjectMemberDto> Members { get; set; } = new List<ProjectMemberDto>();
+
+    // Custom board statuses (built-in ToDo/InProgress/Complete are implicit).
+    public List<ProjectStatusDto> Statuses { get; set; } = new();
+}
+
+public class ProjectStatusDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Color { get; set; } = "#7b68ee";
 }
 
 public class ProjectMemberDto
