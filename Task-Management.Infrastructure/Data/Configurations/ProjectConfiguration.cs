@@ -16,5 +16,10 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
                .WithMany(s => s.Projects)
                .HasForeignKey(p => p.SpaceId)
                .OnDelete(DeleteBehavior.Cascade);
+
+        // Many-to-Many: Project <-> User (SharedProjects)
+        builder.HasMany(p => p.Members)
+               .WithMany(u => u.SharedProjects)
+               .UsingEntity(j => j.ToTable("ProjectMembers"));
     }
 }

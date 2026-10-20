@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Task_Management.Application.Features.Tasks.DTOs;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 
@@ -10,10 +11,12 @@ namespace Task_Management.Application.Features.Tasks.Commands;
 
 public class CreateTaskCommand : IRequest<Result<TaskItemDto>>
 {
+    public int UserId { get; set; }
     public CreateTaskDto TaskDto { get; set; }
 
-    public CreateTaskCommand(CreateTaskDto taskDto)
+    public CreateTaskCommand(int userId, CreateTaskDto taskDto)
     {
+        UserId = userId;
         TaskDto = taskDto;
     }
 }
@@ -45,6 +48,7 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Resul
     public async Task<Result<TaskItemDto>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
         var task = _mapper.Map<TaskItem>(request.TaskDto);
+        TaskHistory.Record(task, request.UserId, TaskActivityType.Created);
 
         _unitOfWork.Repository<TaskItem>().Add(task);
         await _unitOfWork.CompleteAsync();

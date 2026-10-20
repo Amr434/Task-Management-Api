@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Task_Management.Application.Features.Tasks.DTOs;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 
@@ -11,11 +12,13 @@ namespace Task_Management.Application.Features.Tasks.Commands;
 public class UpdateTaskCommand : IRequest<Result<TaskItemDto>>
 {
     public int TaskId { get; set; }
+    public int UserId { get; set; }
     public UpdateTaskDto TaskDto { get; set; }
 
-    public UpdateTaskCommand(int taskId, UpdateTaskDto taskDto)
+    public UpdateTaskCommand(int taskId, int userId, UpdateTaskDto taskDto)
     {
         TaskId = taskId;
+        UserId = userId;
         TaskDto = taskDto;
     }
 }
@@ -56,19 +59,42 @@ public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand, Resul
             return Result.Failure<TaskItemDto>(new Error("Task.NotFound", $"Task with Id {request.TaskId} was not found."));
         }
 
-        task.Title = request.TaskDto.Title;
-        task.Description = request.TaskDto.Description;
-        task.DueDate = request.TaskDto.DueDate;
-        task.Priority = request.TaskDto.Priority;
-        task.Order = request.TaskDto.Order;
-        task.ProjectId = request.TaskDto.ProjectId;
-        task.Status = request.TaskDto.Status;
-        task.ParentTaskId = request.TaskDto.ParentTaskId;
+        var dto = request.TaskDto;
+
+        // Log each field that actually changed. Order and parent are left out:
+        // reordering on a board is noise, not history.
+        if (task.Title != dto.Title)
+            TaskHistory.Record(task, request.UserId, TaskActivityType.TitleChanged, task.Title, dto.Title);
+        if ((task.Description ?? "") != (dto.Description ?? ""))
+            TaskHistory.Record(task, request.UserId, TaskActivityType.DescriptionChanged);
+        if (task.Status != dto.Status)
+            TaskHistory.Record(task, request.UserId, TaskActivityType.StatusChanged,
+                task.Status.ToString(), dto.Status.ToString());
+        if (task.Priority != dto.Priority)
+            TaskHistory.Record(task, request.UserId, TaskActivityType.PriorityChanged,
+                task.Priority.ToString(), dto.Priority.ToString());
+        if (TaskHistory.DateText(task.DueDate) != TaskHistory.DateText(dto.DueDate))
+            TaskHistory.Record(task, request.UserId, TaskActivityType.DueDateChanged,
+                TaskHistory.DateText(task.DueDate), TaskHistory.DateText(dto.DueDate));
+        if (task.ProjectId != dto.ProjectId)
+        {
+            var from = await _unitOfWork.Repository<Project>().GetByIdAsync(task.ProjectId);
+            var to = await _unitOfWork.Repository<Project>().GetByIdAsync(dto.ProjectId);
+            TaskHistory.Record(task, request.UserId, TaskActivityType.MovedToProject, from?.Name, to?.Name);
+        }
+
+        task.Title = dto.Title;
+        task.Description = dto.Description;
+        task.DueDate = dto.DueDate;
+        task.Priority = dto.Priority;
+        task.Order = dto.Order;
+        task.ProjectId = dto.ProjectId;
+        task.Status = dto.Status;
+        task.ParentTaskId = dto.ParentTaskId;
 
         _unitOfWork.Repository<TaskItem>().Update(task);
         await _unitOfWork.CompleteAsync();
 
-        var dto = _mapper.Map<TaskItemDto>(task);
-        return Result.Success(dto);
+        return Result.Success(_mapper.Map<TaskItemDto>(task));
     }
 }

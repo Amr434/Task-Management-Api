@@ -14,6 +14,11 @@ public class TaskItem : BaseEntity
     public Project? Project { get; set; }
     public TaskStatusLevel Status { get; set; } = TaskStatusLevel.ToDo;
 
+    // The due date each reminder was last sent for, so it goes once per due
+    // date and again if the date is moved.
+    public DateTime? DueSoonReminderSentFor { get; set; }
+    public DateTime? OverdueReminderSentFor { get; set; }
+
     // Subtasks relationship
     public int? ParentTaskId { get; set; }
     public TaskItem? ParentTask { get; set; }
@@ -24,4 +29,5 @@ public class TaskItem : BaseEntity
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+    public ICollection<TaskActivity> Activities { get; set; } = new List<TaskActivity>();
 }

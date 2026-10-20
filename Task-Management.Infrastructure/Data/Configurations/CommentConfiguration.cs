@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Task_Management.Domain.Entities;
 
@@ -20,6 +20,18 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder.HasOne(c => c.User)
                .WithMany() // No need for inverse navigation property on User right now
                .HasForeignKey(c => c.UserId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+        // Assigned comments: optional assignee and resolver. Restrict like the
+        // author FK — multiple cascade paths to Users are not allowed anyway.
+        builder.HasOne(c => c.AssignedTo)
+               .WithMany()
+               .HasForeignKey(c => c.AssignedToId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(c => c.ResolvedBy)
+               .WithMany()
+               .HasForeignKey(c => c.ResolvedById)
                .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -1,0 +1,40 @@
+using Task_Management.Application.Features.Users.DTOs;
+
+namespace Task_Management.Application.Features.Comments.DTOs;
+
+public class CommentDto
+{
+    public int Id { get; set; }
+    public string Text { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+
+    public UserDto? Author { get; set; }
+    public UserDto? AssignedTo { get; set; }
+    public UserDto? ResolvedBy { get; set; }
+    public DateTime? ResolvedAt { get; set; }
+
+    // Task context, populated when the task is loaded with the comment
+    // (always for the "Assigned Comments" view).
+    public int TaskItemId { get; set; }
+    public string? TaskTitle { get; set; }
+    public int ProjectId { get; set; }
+    public string? ProjectName { get; set; }
+    public string? SpaceName { get; set; }
+
+    // Replies feed only: has the current user opened this comment yet?
+    // Always true for their own comments. Null elsewhere.
+    public bool? IsRead { get; set; }
+}
+
+public class CreateCommentDto
+{
+    public string Text { get; set; } = string.Empty;
+
+    // Optional: makes it an "assigned comment" (action item) for a
+    // project participant — the author themselves or anyone else.
+    public int? AssignedToId { get; set; }
+
+    // People @mentioned in the text (picked from the project's members). Each
+    // gets a notification; ids that aren't project participants are ignored.
+    public List<int>? MentionedUserIds { get; set; }
+}

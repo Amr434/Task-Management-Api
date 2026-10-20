@@ -1,5 +1,6 @@
 using MediatR;
 using Task_Management.Domain.Entities;
+using Task_Management.Domain.Enums;
 using Task_Management.Domain.Interfaces;
 using Task_Management.Domain.Shared;
 using Task_Management.Domain.Specifications.Tasks;
@@ -10,11 +11,13 @@ public class RemoveTagFromTaskCommand : IRequest<Result<bool>>
 {
     public int TaskId { get; set; }
     public int TagId { get; set; }
+    public int ActorId { get; set; }
 
-    public RemoveTagFromTaskCommand(int taskId, int tagId)
+    public RemoveTagFromTaskCommand(int taskId, int tagId, int actorId)
     {
         TaskId = taskId;
         TagId = tagId;
+        ActorId = actorId;
     }
 }
 
@@ -47,6 +50,7 @@ public class RemoveTagFromTaskCommandHandler : IRequestHandler<RemoveTagFromTask
         }
 
         // 3. Remove the relationship and save — EF Core tracks the join-table deletion
+        TaskHistory.Record(task, request.ActorId, TaskActivityType.TagRemoved, oldValue: tag.Name);
         task.Tags.Remove(tag);
         await _unitOfWork.CompleteAsync();
 

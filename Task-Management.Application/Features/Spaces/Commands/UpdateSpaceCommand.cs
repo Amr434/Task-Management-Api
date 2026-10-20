@@ -12,11 +12,13 @@ public class UpdateSpaceCommand : IRequest<Result<SpaceDto>>
 {
     public int Id { get; set; }
     public UpdateSpaceDto SpaceDto { get; set; }
+    public int UserId { get; set; }
 
-    public UpdateSpaceCommand(int id, UpdateSpaceDto spaceDto)
+    public UpdateSpaceCommand(int id, UpdateSpaceDto spaceDto, int userId)
     {
         Id = id;
         SpaceDto = spaceDto;
+        UserId = userId;
     }
 }
 
@@ -48,6 +50,12 @@ public class UpdateSpaceCommandHandler : IRequestHandler<UpdateSpaceCommand, Res
         if (space == null)
         {
             return Result.Failure<SpaceDto>(new Error("Space.NotFound", "Space not found."));
+        }
+
+        // Only the owner can edit the space itself (members can work inside it).
+        if (space.OwnerId.HasValue && space.OwnerId != request.UserId)
+        {
+            return Result.Failure<SpaceDto>(new Error("Space.NotOwner", "Only the space owner can edit this space."));
         }
 
         space.Name = request.SpaceDto.Name;

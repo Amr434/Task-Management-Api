@@ -9,15 +9,16 @@ COPY ["Task-Management.Domain/Task-Management.Domain.csproj", "Task-Management.D
 COPY ["Task-Management.Infrastructure/Task-Management.Infrastructure.csproj", "Task-Management.Infrastructure/"]
 
 # Restore dependencies
-RUN dotnet restore "Task-Management.Api/Task-Management.Api.csproj"
+# The csproj pins RuntimeIdentifier=win-x86 (for IIS); the container is Linux.
+RUN dotnet restore "Task-Management.Api/Task-Management.Api.csproj" -r linux-x64
 
 # Copy the rest of the code
 COPY . .
 WORKDIR "/src/Task-Management.Api"
-RUN dotnet build "Task-Management.Api.csproj" -c Release -o /app/build
+RUN dotnet build "Task-Management.Api.csproj" -c Release -o /app/build -r linux-x64 --self-contained false --no-restore
 
 FROM build AS publish
-RUN dotnet publish "Task-Management.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Task-Management.Api.csproj" -c Release -o /app/publish -r linux-x64 --self-contained false --no-restore /p:UseAppHost=false
 
 # Final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final

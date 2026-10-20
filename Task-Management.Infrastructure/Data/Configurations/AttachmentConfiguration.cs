@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Task_Management.Domain.Entities;
 
@@ -16,5 +16,10 @@ public class AttachmentConfiguration : IEntityTypeConfiguration<Attachment>
                .WithMany(t => t.Attachments)
                .HasForeignKey(a => a.TaskItemId)
                .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(a => a.UploadedBy)
+               .WithMany()
+               .HasForeignKey(a => a.UploadedById)
+               .OnDelete(DeleteBehavior.Restrict);
     }
 }
