@@ -21,6 +21,17 @@ public class User : BaseEntity
     // The file name is unique per upload, so it doubles as a cache-buster.
     public string? AvatarPath { get; set; }
 
+    // Email settings. Every email kind is on by default; MutedEmailCategories
+    // holds one bit per EmailCategory the user turned off.
+    public EmailDeliveryMode EmailMode { get; set; } = EmailDeliveryMode.Instant;
+    public int MutedEmailCategories { get; set; }
+    public SummaryFrequency EmailSummary { get; set; } = SummaryFrequency.Off;
+    // When the last digest / summary email went out, so each goes once per period.
+    public DateTime? LastDigestSentAtUtc { get; set; }
+    public DateTime? LastSummarySentAtUtc { get; set; }
+
+    public bool WantsEmail(EmailCategory category) => (MutedEmailCategories & (1 << (int)category)) == 0;
+
     // Navigation properties
     public ICollection<Space> Spaces { get; set; } = new List<Space>();
     public ICollection<Project> SharedProjects { get; set; } = new List<Project>();

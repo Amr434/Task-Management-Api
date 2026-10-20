@@ -18,6 +18,7 @@ public class TaskManagementDbContext : DbContext
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<Invitation> Invitations { get; set; }
     public DbSet<Dashboard> Dashboards { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     public TaskManagementDbContext(DbContextOptions<TaskManagementDbContext> options) : base(options)
     {

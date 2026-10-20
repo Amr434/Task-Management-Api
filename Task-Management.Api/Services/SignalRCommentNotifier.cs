@@ -15,7 +15,8 @@ public class SignalRCommentNotifier : ICommentNotifier
         _hubContext = hubContext;
     }
 
-    public async Task CommentAddedAsync(IEnumerable<int> recipientUserIds, CommentDto comment)
+    // Everyone gets the same pop-up; mentions show up in the bell (see NotificationCenter).
+    public async Task CommentAddedAsync(IEnumerable<int> recipientUserIds, CommentDto comment, IReadOnlyCollection<int> mentionedUserIds)
     {
         var ids = recipientUserIds.Select(id => id.ToString()).ToList();
         if (ids.Count == 0) return;

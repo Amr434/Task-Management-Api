@@ -277,6 +277,42 @@ namespace Task_Management.Infrastructure.Migrations
                     b.ToTable("Invitations");
                 });
 
+            modelBuilder.Entity("Task_Management.Domain.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("EmailCategory")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReadAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "CreatedAtUtc");
+
+                    b.HasIndex("UserId", "ReadAtUtc");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("Task_Management.Domain.Entities.PasswordResetToken", b =>
                 {
                     b.Property<int>("Id")
@@ -487,8 +523,14 @@ namespace Task_Management.Infrastructure.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DueSoonReminderSentFor")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("Order")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("OverdueReminderSentFor")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("ParentTaskId")
                         .HasColumnType("int");
@@ -535,6 +577,12 @@ namespace Task_Management.Infrastructure.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<int>("EmailMode")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmailSummary")
+                        .HasColumnType("int");
+
                     b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -547,13 +595,22 @@ namespace Task_Management.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastDigestSentAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime?>("LastSummarySentAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("MustChangePassword")
                         .HasColumnType("bit");
+
+                    b.Property<int>("MutedEmailCategories")
+                        .HasColumnType("int");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -751,6 +808,17 @@ namespace Task_Management.Infrastructure.Migrations
                     b.Navigation("Project");
 
                     b.Navigation("Space");
+                });
+
+            modelBuilder.Entity("Task_Management.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("Task_Management.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Task_Management.Domain.Entities.PasswordResetToken", b =>

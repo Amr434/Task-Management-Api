@@ -114,13 +114,14 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddSignalR();
-// Notifications go out live (SignalR) and by email (see CompositeNotifiers).
+// Notifications go out live (SignalR) and to the saved list + email (see CompositeNotifiers).
 builder.Services.AddScoped<SignalRInvitationNotifier>();
 builder.Services.AddScoped<SignalRCommentNotifier>();
 builder.Services.AddScoped<SignalRTaskNotifier>();
 builder.Services.AddScoped<IInvitationNotifier, CompositeInvitationNotifier>();
 builder.Services.AddScoped<ICommentNotifier, CompositeCommentNotifier>();
 builder.Services.AddScoped<ITaskNotifier, CompositeTaskNotifier>();
+builder.Services.AddSingleton<INotificationPusher, SignalRNotificationPusher>();
 
 builder.Services.AddCors(options =>
 {
