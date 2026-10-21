@@ -14,6 +14,11 @@ public class TaskItem : BaseEntity
     public Project? Project { get; set; }
     public TaskStatusLevel Status { get; set; } = TaskStatusLevel.ToDo;
 
+    // Who created the task; only they may delete it. Null for old tasks whose
+    // creator isn't known.
+    public int? CreatedById { get; set; }
+    public User? CreatedBy { get; set; }
+
     // The due date each reminder was last sent for, so it goes once per due
     // date and again if the date is moved.
     public DateTime? DueSoonReminderSentFor { get; set; }

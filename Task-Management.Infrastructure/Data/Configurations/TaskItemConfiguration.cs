@@ -20,6 +20,12 @@ public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
                .HasForeignKey(t => t.ProjectId)
                .OnDelete(DeleteBehavior.Cascade);
 
+        // Creator. Restrict like TaskActivity.UserId — a second cascade path to Users is not allowed.
+        builder.HasOne(t => t.CreatedBy)
+               .WithMany()
+               .HasForeignKey(t => t.CreatedById)
+               .OnDelete(DeleteBehavior.Restrict);
+
         // Self-Referencing: ParentTask -> SubTasks
         builder.HasOne(t => t.ParentTask)
                .WithMany(t => t.SubTasks)

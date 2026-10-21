@@ -13,7 +13,10 @@ public class TaskItemDto
     public int ProjectId { get; set; }
     public TaskStatusLevel Status { get; set; }
     public int? ParentTaskId { get; set; }
-    
+
+    // Only this user may delete the task (clients use it to hide Delete).
+    public int? CreatedById { get; set; }
+
     // Additional properties for display in global views (like My Tasks)
     public string? ProjectName { get; set; }
     public string? SpaceName { get; set; }

@@ -48,6 +48,7 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Resul
     public async Task<Result<TaskItemDto>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
         var task = _mapper.Map<TaskItem>(request.TaskDto);
+        task.CreatedById = request.UserId;
         TaskHistory.Record(task, request.UserId, TaskActivityType.Created);
 
         _unitOfWork.Repository<TaskItem>().Add(task);

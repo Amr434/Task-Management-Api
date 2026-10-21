@@ -143,7 +143,7 @@ public class TasksController : BaseApiController
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteTask(int id)
     {
-        var command = new DeleteTaskCommand(id);
+        var command = new DeleteTaskCommand(id, CurrentUserId);
         var result = await Mediator.Send(command);
         
         return HandleResult(result);
